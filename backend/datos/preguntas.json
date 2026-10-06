@@ -1,0 +1,190 @@
+{
+  "categorias": [
+    {
+      "id": "cat-filosofia",
+      "nombre": "Filosofía",
+      "descripcion": "Preguntas sobre historia de la filosofía, autores y corrientes de pensamiento",
+      "preguntas": [
+        {
+          "id": "preg-fil-01",
+          "enunciado": "¿Qué filósofo propuso el método dialéctico basado en preguntas sucesivas conocido como mayéutica?",
+          "opciones": [
+            "Sócrates",
+            "Platón",
+            "Aristóteles",
+            "Heráclito"
+          ],
+          "respuestaCorrecta": 0
+        },
+        {
+          "id": "preg-fil-02",
+          "enunciado": "¿A qué corriente filosófica pertenece René Descartes?",
+          "opciones": [
+            "Racionalismo",
+            "Empirismo",
+            "Idealismo alemán",
+            "Existencialismo"
+          ],
+          "respuestaCorrecta": 0
+        },
+        {
+          "id": "preg-fil-03",
+          "enunciado": "¿Quién es el autor de la obra 'Crítica de la razón pura'?",
+          "opciones": [
+            "David Hume",
+            "Immanuel Kant",
+            "Baruch Spinoza",
+            "Arthur Schopenhauer"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-fil-04",
+          "enunciado": "¿Qué concepto central desarrolló Friedrich Nietzsche sobre la superación del ser humano tradicional?",
+          "opciones": [
+            "El imperativo categórico",
+            "El superhombre",
+            "La tabula rasa",
+            "El alma tripartita"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-fil-05",
+          "enunciado": "¿Qué obra platónica contiene la famosa alegoría de la caverna?",
+          "opciones": [
+            "El banquete",
+            "Fedón",
+            "La República",
+            "Timeo"
+          ],
+          "respuestaCorrecta": 2
+        }
+      ]
+    },
+    {
+      "id": "cat-lengua",
+      "nombre": "Lengua y Literatura",
+      "descripcion": "Preguntas sobre gramática, figuras retóricas y literatura española",
+      "preguntas": [
+        {
+          "id": "preg-len-01",
+          "enunciado": "¿Qué figura retórica consiste en la exageración intencionada de la realidad para aumentar su expresividad?",
+          "opciones": [
+            "Metáfora",
+            "Hipérbole",
+            "Sinestesia",
+            "Elipsis"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-len-02",
+          "enunciado": "¿Quién escribió la célebre novela 'Don Quijote de la Mancha'?",
+          "opciones": [
+            "Lope de Vega",
+            "Francisco de Quevedo",
+            "Miguel de Cervantes",
+            "Luis de Góngora"
+          ],
+          "respuestaCorrecta": 2
+        },
+        {
+          "id": "preg-len-03",
+          "enunciado": "¿Cuál de las siguientes palabras es un ejemplo de palabra esdrújula?",
+          "opciones": [
+            "Brújula",
+            "Camión",
+            "Árbol",
+            "Reloj"
+          ],
+          "respuestaCorrecta": 0
+        },
+        {
+          "id": "preg-len-04",
+          "enunciado": "¿A qué movimiento literario del siglo XIX pertenecen Gustavo Adolfo Bécquer y Rosalía de Castro?",
+          "opciones": [
+            "Realismo",
+            "Romanticismo",
+            "Modernismo",
+            "Barroco"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-len-05",
+          "enunciado": "En sintaxis, ¿qué función desempeña el sintagma preposicional sustituible por los pronombres 'le' o 'les'?",
+          "opciones": [
+            "Complemento directo",
+            "Complemento indirecto",
+            "Complemento de régimen",
+            "Complemento agente"
+          ],
+          "respuestaCorrecta": 1
+        }
+      ]
+    },
+    {
+      "id": "cat-biologia",
+      "nombre": "Biología",
+      "descripcion": "Preguntas sobre citología, genética y procesos biológicos",
+      "preguntas": [
+        {
+          "id": "preg-bio-01",
+          "enunciado": "¿Qué orgánulo celular es el principal responsable de la respiración celular y la producción de ATP?",
+          "opciones": [
+            "Aparato de Golgi",
+            "Retículo endoplasmático",
+            "Mitocondria",
+            "Lisosoma"
+          ],
+          "respuestaCorrecta": 2
+        },
+        {
+          "id": "preg-bio-02",
+          "enunciado": "¿Cuáles son las cuatro bases nitrogenadas que componen el ADN?",
+          "opciones": [
+            "Adenina, Guanina, Citosina y Timina",
+            "Adenina, Guanina, Citosina y Uracilo",
+            "Adenina, Timina, Uracilo y Citosina",
+            "Guanina, Citosina, Uracilo y Ribosa"
+          ],
+          "respuestaCorrecta": 0
+        },
+        {
+          "id": "preg-bio-03",
+          "enunciado": "¿Quién es considerado el padre de la genética gracias a sus leyes de la herencia?",
+          "opciones": [
+            "Charles Darwin",
+            "Gregor Mendel",
+            "Louis Pasteur",
+            "Alexander Fleming"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-bio-04",
+          "enunciado": "¿Cómo se denomina la división celular mediante la cual se generan células reproductoras haploides?",
+          "opciones": [
+            "Mitosis",
+            "Meiosis",
+            "Bipartición",
+            "Gemación"
+          ],
+          "respuestaCorrecta": 1
+        },
+        {
+          "id": "preg-bio-05",
+          "enunciado": "¿Qué pigmento es imprescindible para absorber la energía solar en la fotosíntesis?",
+          "opciones": [
+            "Caroteno",
+            "Hemoglobina",
+            "Clorofila",
+            "Melanina"
+          ],
+          "respuestaCorrecta": 2
+        }
+      ]
+    }
+  ]
+}
