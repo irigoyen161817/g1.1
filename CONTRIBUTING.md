@@ -84,9 +84,8 @@ El proyecto utiliza un formato estricto validado automáticamente por **Husky** 
 
 ### 3.2. Estándar de comentarios en el código
 
-- **Clases y métodos:** Toda clase, método o función principal debe incluir un bloque de comentario descriptivo (formato JSDoc `/** ... */`) indicando su propósito, parámetros de entrada y valor de retorno.
 - **Fragmentos no evidentes:** Cualquier bloque de lógica compleja, expresión regular o decisión técnica no evidente debe ir acompañado de un comentario en línea (`//`) que explique claramente **qué hace y por qué** se ha implementado de esa manera.
-- **Código autoexplicativo:** Se deben evitar comentarios redundantes en líneas obvias, priorizando nombres de variables y métodos descriptivos.
+- **Código autoexplicativo:** Se deben evitar comentarios redundantes en líneas obvias y no se exige documentar clases, métodos o funciones mediante JSDoc. Se priorizan nombres de variables y métodos descriptivos.
 
 ---
 
