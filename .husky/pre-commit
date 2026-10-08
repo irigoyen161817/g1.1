@@ -1,0 +1,3 @@
+node scripts/validarRama.js
+npm run lint:frontend
+npm run lint:backend
