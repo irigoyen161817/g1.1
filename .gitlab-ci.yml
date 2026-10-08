@@ -1,0 +1,36 @@
+image: node:20-alpine
+
+stages:
+  - lint
+  - build
+
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+lint:frontend:
+  stage: lint
+  before_script:
+    - cd frontend
+    - npm ci --prefer-offline
+  script:
+    - npm run lint
+
+lint:backend:
+  stage: lint
+  before_script:
+    - cd backend
+    - npm ci --prefer-offline
+  script:
+    - npm run lint
+
+build:frontend:
+  stage: build
+  before_script:
+    - cd frontend
+    - npm ci --prefer-offline
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 1 week
