@@ -1,11 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
+/**
+ * Componente principal de la aplicacion cliente (Frontend).
+ * Renderiza la interfaz de bienvenida y muestra el estado de conexion con el backend.
+ */
 function App() {
   const [count, setCount] = useState(0)
+  const [mensajeBackend, setMensajeBackend] = useState('')
+  const [estaCargando, setEstaCargando] = useState(true)
+
+  useEffect(() => {
+    const obtenerMensajeBackend = async () => {
+      try {
+        const respuesta = await fetch('/api/mensajes')
+        const datos = await respuesta.json()
+        setMensajeBackend(datos.mensaje)
+      } catch (error) {
+        console.error('Error al conectar con el backend:', error)
+        setMensajeBackend('No se pudo conectar con el servidor backend')
+      } finally {
+        setEstaCargando(false)
+      }
+    }
+
+    obtenerMensajeBackend()
+  }, [])
 
   return (
     <>
@@ -28,6 +51,13 @@ function App() {
         >
           Count is {count}
         </button>
+
+        <div className="mensaje-backend">
+          <p>
+            <strong>Estado backend:</strong>{' '}
+            {estaCargando ? 'Conectando con el servidor...' : mensajeBackend}
+          </p>
+        </div>
       </section>
 
       <div className="ticks"></div>

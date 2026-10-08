@@ -17,6 +17,16 @@
   }
 }
 
+.mensaje-backend {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--text-h);
+  margin-bottom: 16px;
+}
+
 .hero {
   position: relative;
 
