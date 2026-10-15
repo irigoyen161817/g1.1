@@ -33,10 +33,14 @@ aplicacion.get('/api/tematicas', (peticion, respuesta) => {
 });
 
 aplicacion.get('/api/preguntas', (peticion, respuesta) => {
-  const { tematica } = peticion.query;
-  const categoria = datosPreguntas.categorias.find(
-    ({ nombre }) => nombre.toLocaleLowerCase() === String(tematica).toLocaleLowerCase()
-  );
+  const { tematica, id } = peticion.query;
+  const categoria = datosPreguntas.categorias.find(({ id: categoriaId, nombre }) => {
+    if (id) {
+      return categoriaId === String(id);
+    }
+
+    return nombre.toLocaleLowerCase() === String(tematica).toLocaleLowerCase();
+  });
 
   if (!categoria) {
     respuesta.status(404).json({

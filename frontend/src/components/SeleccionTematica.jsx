@@ -34,7 +34,7 @@ function SeleccionTematica() {
   }, [])
 
   const obtenerPreguntas = async (tematica) => {
-    if (!tematica || !tematica.nombre) {
+    if (!tematica || !tematica.id) {
       return
     }
 
@@ -44,7 +44,7 @@ function SeleccionTematica() {
 
     try {
       const respuesta = await fetch(
-        `/api/preguntas?tematica=${encodeURIComponent(tematica.nombre)}`
+        `/api/preguntas?id=${encodeURIComponent(tematica.id)}`
       )
 
       if (!respuesta.ok) {
