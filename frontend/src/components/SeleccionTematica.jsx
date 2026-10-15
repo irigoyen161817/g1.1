@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Encabezado from './Encabezado'
+import PantallaPregunta from './PantallaPregunta'
 import TarjetaTematica from './TarjetaTematica'
 
 function SeleccionTematica() {
@@ -66,6 +67,36 @@ function SeleccionTematica() {
 
   const seleccionarTematica = (tematica) => {
     void obtenerPreguntas(tematica)
+  }
+
+  const volverASeleccionTematica = () => {
+    setPreguntas([])
+    setTematicaSeleccionada('')
+    setMensajeErrorPreguntas('')
+  }
+
+  if (tematicaSeleccionada && estaCargandoPreguntas) {
+    return (
+      <div className="aplicacion">
+        <Encabezado />
+        <p className="estado-tematicas" role="status">
+          Cargando preguntas de {tematicaSeleccionada}...
+        </p>
+      </div>
+    )
+  }
+
+  if (tematicaSeleccionada && !mensajeErrorPreguntas && preguntas.length > 0) {
+    return (
+      <div className="aplicacion">
+        <Encabezado />
+        <PantallaPregunta
+          key={tematicaSeleccionada}
+          preguntas={preguntas}
+          alSalir={volverASeleccionTematica}
+        />
+      </div>
+    )
   }
 
   return (
