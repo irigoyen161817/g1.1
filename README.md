@@ -54,7 +54,7 @@ Vite mostrará en la terminal la dirección local donde se sirve la aplicación,
 El proyecto utiliza una arquitectura separada en dos aplicaciones:
 
 - `backend/`: servidor HTTP desarrollado con Node.js y Express. El punto de entrada es `app.js` y expone la ruta `GET /` para comprobar que el servidor está funcionando.
-- `frontend/`: aplicación cliente desarrollada con React y Vite. El código principal se encuentra en `src/`, con `App.jsx` como componente principal y `main.jsx` como punto de entrada.
+- `frontend/`: aplicación cliente desarrollada con React y Vite. El código principal se encuentra en `src/`, con `App.jsx` como componente principal y `main.jsx` como punto de entrada. La selección de temáticas se gestiona desde `components/SeleccionTematica.jsx` y el cuestionario se coordina desde `components/PantallaPregunta.jsx`, acompañado de componentes independientes para el progreso, las opciones, la navegación y la pantalla final.
 - `scripts/`: scripts auxiliares del proyecto.
 - `.gitlab/`: configuración y plantillas utilizadas por GitLab.
 - `.husky/`: hooks de Git para automatizar comprobaciones del flujo de trabajo.
