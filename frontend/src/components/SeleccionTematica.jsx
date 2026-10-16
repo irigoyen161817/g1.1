@@ -7,6 +7,7 @@ function SeleccionTematica() {
   const [tematicas, setTematicas] = useState([])
   const [preguntas, setPreguntas] = useState([])
   const [tematicaSeleccionada, setTematicaSeleccionada] = useState('')
+  const [tematicaIdSeleccionada, setTematicaIdSeleccionada] = useState('')
   const [estaCargando, setEstaCargando] = useState(true)
   const [estaCargandoPreguntas, setEstaCargandoPreguntas] = useState(false)
   const [mensajeError, setMensajeError] = useState('')
@@ -42,6 +43,7 @@ function SeleccionTematica() {
     setEstaCargandoPreguntas(true)
     setMensajeErrorPreguntas('')
     setTematicaSeleccionada(tematica.nombre)
+    setTematicaIdSeleccionada(tematica.id || '')
 
     try {
       const respuesta = await fetch(
@@ -72,6 +74,7 @@ function SeleccionTematica() {
   const volverASeleccionTematica = () => {
     setPreguntas([])
     setTematicaSeleccionada('')
+    setTematicaIdSeleccionada('')
     setMensajeErrorPreguntas('')
   }
 
@@ -92,6 +95,7 @@ function SeleccionTematica() {
         <Encabezado />
         <PantallaPregunta
           key={tematicaSeleccionada}
+          tematicaId={tematicaIdSeleccionada}
           preguntas={preguntas}
           alSalir={volverASeleccionTematica}
         />
