@@ -76,6 +76,24 @@ El proyecto utiliza una arquitectura separada en dos aplicaciones:
 
 El frontend y el backend se ejecutan como procesos independientes durante el desarrollo. La comunicación entre ambos se ampliará mediante endpoints de la API y la configuración correspondiente de Vite a medida que avance el proyecto.
 
+### Historial de Cuestionarios
+El backend mantiene un registro en memoria de los cuestionarios completados.
+- **Almacenamiento:** Array en memoria en el servidor (se reinicia al apagar el servidor).
+- **Alimentación:** El endpoint `POST /api/corregir` añade automáticamente una entrada al historial cada vez que se corrige un cuestionario con éxito.
+- **Consultas:** La función `obtenerHistorial` permite leer el array, aunque de momento no se expone por ningún endpoint.
+- **Modelo de datos:**
+```json
+{
+  "id": "hist-1",
+  "fecha": "2026-10-16T10:30:00.000Z",
+  "tematicaId": "cat-filosofia",
+  "tematicaNombre": "Filosofía",
+  "aciertos": 4,
+  "total": 5,
+  "nota": 8
+}
+```
+
 ## Flujo de contribución
 
 Las ramas, commits y merge requests deben seguir las reglas definidas en `CONTRIBUTING.md`. Todo cambio debe revisarse mediante una merge request antes de incorporarse a `main`.

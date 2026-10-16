@@ -5,8 +5,29 @@ const datosPreguntas = require('./datos/preguntas.json');
 const aplicacion = express();
 const PUERTO = process.env.PUERTO || 3000;
 
-aplicacion.use(cors());
+const historial = [];
+let contadorIdHistorial = 1;
 
+function registrarEntradaHistorial({ tematicaId, tematicaNombre, aciertos, total, nota }) {
+  const entrada = {
+    id: `hist-${contadorIdHistorial++}`,
+    fecha: new Date().toISOString(),
+    tematicaId,
+    tematicaNombre,
+    aciertos,
+    total,
+    nota
+  };
+
+  historial.push(entrada);
+  return entrada;
+}
+
+function obtenerHistorial() {
+  return [...historial];
+}
+
+aplicacion.use(cors());
 aplicacion.use(express.json());
 
 aplicacion.get('/', (peticion, respuesta) => {
@@ -38,7 +59,6 @@ aplicacion.get('/api/preguntas', (peticion, respuesta) => {
     if (id) {
       return categoriaId === String(id);
     }
-
     return nombre.toLocaleLowerCase() === String(tematica).toLocaleLowerCase();
   });
 
@@ -132,6 +152,14 @@ aplicacion.post('/api/corregir', (peticion, respuesta) => {
   const fallos = detalle.length - aciertos;
   const nota = Number(((aciertos / detalle.length) * 10).toFixed(1));
 
+  registrarEntradaHistorial({
+    tematicaId: categoria.id,
+    tematicaNombre: categoria.nombre,
+    aciertos,
+    total: detalle.length,
+    nota
+  });
+
   respuesta.json({ aciertos, fallos, nota, detalle });
 });
 
@@ -139,4 +167,8 @@ const servidor = aplicacion.listen(PUERTO, () => {
   console.log(`Servidor backend escuchando en http://localhost:${PUERTO}`);
 });
 
-module.exports = { aplicacion, servidor };
+module.exports = {
+  aplicacion,
+  servidor,
+  obtenerHistorial
+};
