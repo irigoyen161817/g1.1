@@ -64,8 +64,7 @@
   padding: 0 48px;
   background:
     radial-gradient(circle at 88% -30%, rgba(89, 119, 236, 0.12), transparent 38%),
-    radial-gradient(circle at 52% -80%, rgba(191, 211, 255, 0.2), transparent 32%),
-    #f3f4f5;
+    radial-gradient(circle at 52% -80%, rgba(191, 211, 255, 0.2), transparent 32%), #f3f4f5;
 }
 
 .hero-tematicas h1 {
@@ -122,7 +121,10 @@
   background: #ffffff;
   box-shadow: 0 2px 3px rgba(34, 42, 53, 0.03);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .tarjeta-tematica:hover {
@@ -339,7 +341,10 @@
   background: #ffffff;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .opcion-respuesta:hover {

@@ -10,7 +10,11 @@ function OpcionRespuesta({ indice, texto, seleccionada, alSeleccionar }) {
     >
       <span className="letra-opcion">{letraOpcion}</span>
       <span>{texto}</span>
-      {seleccionada && <span className="marca-seleccion" aria-hidden="true">✓</span>}
+      {seleccionada && (
+        <span className="marca-seleccion" aria-hidden="true">
+          ✓
+        </span>
+      )}
     </button>
   )
 }

@@ -8,9 +8,7 @@ function ProgresoCuestionario({ numeroPregunta, totalPreguntas, respuestas }) {
         <h1>
           Pregunta {numeroPregunta + 1} de {totalPreguntas}
         </h1>
-        <span>
-          {respuestas.filter((respuesta) => respuesta !== null).length} respondidas
-        </span>
+        <span>{respuestas.filter((respuesta) => respuesta !== null).length} respondidas</span>
       </div>
       <div
         className="barra-progreso"

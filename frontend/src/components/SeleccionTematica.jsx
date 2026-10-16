@@ -46,9 +46,7 @@ function SeleccionTematica() {
     setTematicaIdSeleccionada(tematica.id || '')
 
     try {
-      const respuesta = await fetch(
-        `/api/preguntas?id=${encodeURIComponent(tematica.id)}`
-      )
+      const respuesta = await fetch(`/api/preguntas?id=${encodeURIComponent(tematica.id)}`)
 
       if (!respuesta.ok) {
         throw new Error('No se pudieron obtener las preguntas')
@@ -60,7 +58,7 @@ function SeleccionTematica() {
       console.error('Error al obtener las preguntas:', error)
       setPreguntas([])
       setMensajeErrorPreguntas(
-        `No se pudieron cargar las preguntas de ${tematica.nombre}. Inténtalo de nuevo.`
+        `No se pudieron cargar las preguntas de ${tematica.nombre}. Inténtalo de nuevo.`,
       )
     } finally {
       setEstaCargandoPreguntas(false)
@@ -114,9 +112,7 @@ function SeleccionTematica() {
           <div className="cabecera-materias">
             <h2 id="titulo-materias">Materias disponibles</h2>
             {!estaCargando && !mensajeError && (
-              <span className="contador-tematicas">
-                {tematicas.length} asignaturas
-              </span>
+              <span className="contador-tematicas">{tematicas.length} asignaturas</span>
             )}
           </div>
           {estaCargando && (

@@ -69,6 +69,7 @@ El proyecto utiliza un formato estricto validado automáticamente por **Husky** 
 
 - **Idioma general del código:** **Español** (variables, métodos, clases, componentes, rutas y comentarios). Evitar el uso de la letra `ñ` y tildes en identificadores de código (usar `anio` en lugar de `año`).
 - **Herramienta de validación:** Todo el código debe pasar sin errores el análisis de **ESLint** antes de subir cambios.
+- **Formato:** Todo el código debe cumplir **Prettier** (`npm run format:check`). Para aplicar el formato automáticamente se usa `npm run format`.
 
 ### 3.1. Convención de nombres (Variables, métodos y clases)
 

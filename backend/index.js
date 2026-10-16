@@ -97,7 +97,8 @@ aplicacion.post('/api/corregir', (peticion, respuesta) => {
   }
 
   const tieneIndicesValidos = respuestas.every(
-    ({ indiceRespuesta }) => Number.isInteger(indiceRespuesta) && indiceRespuesta >= 0 && indiceRespuesta <= 3
+    ({ indiceRespuesta }) =>
+      Number.isInteger(indiceRespuesta) && indiceRespuesta >= 0 && indiceRespuesta <= 3
   );
 
   if (!tieneIndicesValidos) {

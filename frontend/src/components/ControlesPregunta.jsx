@@ -22,11 +22,7 @@ function ControlesPregunta({
         onClick={alAvanzar}
         disabled={!puedeAvanzar || estaCargando}
       >
-        {estaCargando
-          ? 'Corrigiendo...'
-          : esUltimaPregunta
-            ? 'Finalizar'
-            : 'Siguiente'}
+        {estaCargando ? 'Corrigiendo...' : esUltimaPregunta ? 'Finalizar' : 'Siguiente'}
         {!estaCargando && <span aria-hidden="true">→</span>}
       </button>
     </nav>
