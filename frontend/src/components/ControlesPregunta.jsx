@@ -2,6 +2,7 @@ function ControlesPregunta({
   puedeRetroceder,
   puedeAvanzar,
   esUltimaPregunta,
+  estaCargando = false,
   alRetroceder,
   alAvanzar,
 }) {
@@ -11,7 +12,7 @@ function ControlesPregunta({
         className="boton-secundario"
         type="button"
         onClick={alRetroceder}
-        disabled={!puedeRetroceder}
+        disabled={!puedeRetroceder || estaCargando}
       >
         Anterior
       </button>
@@ -19,10 +20,14 @@ function ControlesPregunta({
         className="boton-principal"
         type="button"
         onClick={alAvanzar}
-        disabled={!puedeAvanzar}
+        disabled={!puedeAvanzar || estaCargando}
       >
-        {esUltimaPregunta ? 'Finalizar' : 'Siguiente'}
-        <span aria-hidden="true">→</span>
+        {estaCargando
+          ? 'Corrigiendo...'
+          : esUltimaPregunta
+            ? 'Finalizar'
+            : 'Siguiente'}
+        {!estaCargando && <span aria-hidden="true">→</span>}
       </button>
     </nav>
   )
