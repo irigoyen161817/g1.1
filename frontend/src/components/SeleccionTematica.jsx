@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import AccesoHistorial from './AccesoHistorial'
 import Encabezado from './Encabezado'
 import PantallaPregunta from './PantallaPregunta'
 import TarjetaTematica from './TarjetaTematica'
 
-function SeleccionTematica() {
+function SeleccionTematica({ alVerHistorial }) {
   const [tematicas, setTematicas] = useState([])
   const [preguntas, setPreguntas] = useState([])
   const [tematicaSeleccionada, setTematicaSeleccionada] = useState('')
@@ -104,10 +105,11 @@ function SeleccionTematica() {
   return (
     <div className="aplicacion">
       <Encabezado />
-      <main>
+      <main className="vista-diseno">
         <section className="hero-tematicas" aria-labelledby="titulo-tematicas">
           <h1 id="titulo-tematicas">Elige tu temática de estudio</h1>
         </section>
+        <AccesoHistorial alVerHistorial={alVerHistorial} deshabilitado={estaCargandoPreguntas} />
         <section className="contenido-tematicas" aria-labelledby="titulo-materias">
           <div className="cabecera-materias">
             <h2 id="titulo-materias">Materias disponibles</h2>
