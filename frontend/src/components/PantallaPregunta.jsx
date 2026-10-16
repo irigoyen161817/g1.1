@@ -82,7 +82,7 @@ function PantallaPregunta({ tematicaId, preguntas, alSalir }) {
     } catch (error) {
       console.error('Error al corregir el cuestionario:', error)
       setMensajeErrorCorreccion(
-        'No se pudo corregir el cuestionario. Por favor, inténtalo de nuevo.'
+        'No se pudo corregir el cuestionario. Por favor, inténtalo de nuevo.',
       )
     } finally {
       setEstaCorrigiendo(false)
@@ -139,12 +139,7 @@ function PantallaPregunta({ tematicaId, preguntas, alSalir }) {
   return (
     <main className="pantalla-cuestionario">
       <div className="cabecera-cuestionario">
-        <button
-          className="boton-salir"
-          type="button"
-          onClick={alSalir}
-          disabled={estaCorrigiendo}
-        >
+        <button className="boton-salir" type="button" onClick={alSalir} disabled={estaCorrigiendo}>
           ← Volver a las temáticas
         </button>
       </div>

@@ -7,7 +7,13 @@
     "prepare": "husky",
     "lint:frontend": "npm run lint --prefix frontend",
     "lint:backend": "npm run lint --prefix backend",
-    "lint": "npm run lint:frontend && npm run lint:backend"
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "format:frontend": "npm run format --prefix frontend",
+    "format:backend": "npm run format --prefix backend",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:check:frontend": "npm run format:check --prefix frontend",
+    "format:check:backend": "npm run format:check --prefix backend",
+    "format:check": "npm run format:check:frontend && npm run format:check:backend"
   },
   "devDependencies": {
     "husky": "^9.1.7"
