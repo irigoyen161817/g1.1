@@ -1,0 +1,22 @@
+.vista-diseno {
+  --color-acento: #2952e3;
+  --color-acento-hover: #1e40af;
+  --color-acento-suave: rgba(41, 82, 227, 0.08);
+  --color-texto: #0f1a30;
+  --color-texto-secundario: #444655;
+  --color-texto-suave: #64748b;
+  --color-borde: #e2e6ec;
+  --color-contenedor: #f1f4f9;
+  --color-exito: #00805c;
+  --color-error: #c62828;
+  --fuente-titulos: 'Space Grotesk', sans-serif;
+  --fuente-cuerpo: 'Hanken Grotesk', system-ui, sans-serif;
+
+  font-family: var(--fuente-cuerpo);
+  color: var(--color-texto);
+}
+
+.vista-diseno h1,
+.vista-diseno h2 {
+  font-family: var(--fuente-titulos);
+}

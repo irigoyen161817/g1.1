@@ -58,107 +58,136 @@
 }
 
 .hero-tematicas {
-  min-height: 152px;
   display: flex;
   align-items: center;
-  padding: 0 48px;
-  background:
-    radial-gradient(circle at 88% -30%, rgba(89, 119, 236, 0.12), transparent 38%),
-    radial-gradient(circle at 52% -80%, rgba(191, 211, 255, 0.2), transparent 32%), #f3f4f5;
+  padding: 40px 20px;
+  border-bottom: 1px solid var(--color-borde);
+  background: linear-gradient(
+    90deg,
+    var(--color-contenedor) 0%,
+    var(--color-contenedor) 55%,
+    var(--color-acento-suave) 100%
+  );
 }
 
 .hero-tematicas h1 {
   margin: 0;
-  font-size: clamp(36px, 4.1vw, 52px);
-  line-height: 1.08;
-  letter-spacing: -1.8px;
-  font-weight: 750;
+  font-size: 36px;
+  line-height: 44px;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 .contenido-tematicas {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 48px 52px;
+  padding: 32px 20px 64px;
 }
 
 .cabecera-materias {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .cabecera-materias h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .contador-tematicas {
-  padding: 3px 11px;
+  padding: 4px 10px;
   border-radius: 999px;
-  color: #294183;
-  background: #dbe4ff;
+  color: var(--color-acento);
+  background: var(--color-acento-suave);
   font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .rejilla-tematicas {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
 }
 
 .tarjeta-tematica {
-  min-height: 176px;
+  min-height: 144px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 36px 20px 24px;
-  border: 1px solid #eef0f2;
-  border-radius: 14px;
-  color: #202326;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--color-borde);
+  border-radius: 16px;
+  color: var(--color-texto);
   background: #ffffff;
-  box-shadow: 0 2px 3px rgba(34, 42, 53, 0.03);
   cursor: pointer;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
-.tarjeta-tematica:hover {
-  border-color: #cbd4f8;
-  box-shadow: 0 10px 24px rgba(34, 42, 53, 0.08);
-  transform: translateY(-2px);
+.tarjeta-tematica:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  box-shadow:
+    0 4px 16px -2px rgba(15, 26, 48, 0.06),
+    0 2px 6px -1px rgba(15, 26, 48, 0.03);
+  transform: translateY(-1px);
 }
 
 .tarjeta-tematica:focus-visible {
-  outline: 3px solid rgba(66, 88, 232, 0.3);
-  outline-offset: 3px;
+  outline: none;
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 3px rgba(41, 82, 227, 0.12);
 }
 
 .icono-contenedor {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .icono-contenedor img {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
 }
 
 .nombre-tematica {
   max-width: 240px;
-  font-size: 17px;
-  line-height: 1.35;
-  font-weight: 650;
+  font-family: var(--fuente-titulos);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
   text-align: center;
+}
+
+@media (min-width: 640px) {
+  .hero-tematicas {
+    padding: 64px max(32px, calc((100% - 1216px) / 2));
+  }
+
+  .hero-tematicas h1 {
+    font-size: 48px;
+    line-height: 56px;
+  }
+
+  .contenido-tematicas {
+    padding: 32px 32px 64px;
+  }
 }
 
 .estado-tematicas {
@@ -500,38 +529,20 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 900px) {
-  .rejilla-tematicas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.nombre-tematica {
+  font-family: var(--fuente-titulos);
+}
 
+@media (max-width: 900px) {
   .indicadores-preguntas {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .encabezado,
-  .hero-tematicas {
+  .encabezado {
     padding-right: 20px;
     padding-left: 20px;
-  }
-
-  .hero-tematicas {
-    min-height: 128px;
-  }
-
-  .contenido-tematicas {
-    padding: 28px 20px 40px;
-  }
-
-  .hero-tematicas h1 {
-    font-size: 36px;
-    letter-spacing: -1.1px;
-  }
-
-  .rejilla-tematicas {
-    grid-template-columns: 1fr;
   }
 
   .cabecera-cuestionario,
