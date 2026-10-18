@@ -1,5 +1,3 @@
-import './OpcionRespuesta.css'
-
 function OpcionRespuesta({ indice, texto, seleccionada, alSeleccionar }) {
   const letraOpcion = String.fromCharCode(65 + indice)
 

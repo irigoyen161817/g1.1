@@ -78,7 +78,6 @@ El proyecto utiliza un formato estricto validado automáticamente por **Husky** 
 | **Variables, funciones y métodos**         | `camelCase`                                 | `usuarioActual`, `obtenerListaProductos()`            |
 | **Booleanos**                              | `camelCase` (prefijo `es`, `tiene`, `esta`) | `estaCargando`, `tienePermisos`                       |
 | **Clases y Componentes de React (`.jsx`)** | `PascalCase`                                | `GestorUsuarios`, `FormularioLogin.jsx`               |
-| **Archivos de estilos CSS por componente** | `PascalCase` (mismo nombre que componente)  | `Encabezado.css`, `SeleccionTematica.css`             |
 | **Constantes globales y `.env`**           | `UPPER_SNAKE_CASE`                          | `PUERTO_SERVIDOR`, `MAX_INTENTOS_LOGIN`               |
 | **Archivos JS en Backend y utilidades**    | `camelCase`                                 | `usuarioControlador.js`, `autenticacionMiddleware.js` |
 | **Carpetas del proyecto**                  | `camelCase` (o minúsculas)                  | `controladores/`, `componentes/`                      |
