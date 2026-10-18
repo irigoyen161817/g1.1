@@ -1,3 +1,5 @@
+import './TarjetaTematica.css'
+
 function TarjetaTematica({ tematica, alSeleccionar, deshabilitado = false }) {
   return (
     <button

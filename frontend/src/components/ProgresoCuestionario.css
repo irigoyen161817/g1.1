@@ -1,0 +1,103 @@
+.progreso-cuestionario {
+  padding: 24px;
+  border: 1px solid #eef0f2;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.cabecera-progreso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cabecera-progreso h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.8px;
+}
+
+.cabecera-progreso span {
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.barra-progreso {
+  height: 8px;
+  margin-top: 24px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.barra-progreso span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4258e8;
+  transition: width 0.2s ease;
+}
+
+.indicadores-preguntas {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indicadores-preguntas li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.indicadores-preguntas li span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #eef0f2;
+  font-weight: 700;
+}
+
+.indicadores-preguntas li strong {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicadores-preguntas .indicador-activo {
+  color: #294183;
+}
+
+.indicadores-preguntas .indicador-activo span {
+  color: #ffffff;
+  background: #4258e8;
+}
+
+@media (max-width: 900px) {
+  .indicadores-preguntas {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .cabecera-progreso {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .indicadores-preguntas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
