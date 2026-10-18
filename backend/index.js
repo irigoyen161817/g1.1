@@ -27,6 +27,36 @@ function obtenerHistorial() {
   return [...historial];
 }
 
+// Agrupa las entradas del historial por tematica y calcula metricas acumuladas (totalTests y notaMedia)
+function calcularEstadisticasHistorial(entradasHistorial) {
+  const acumuladosPorTematica = {};
+
+  for (const entrada of entradasHistorial) {
+    const { tematicaId, tematicaNombre, nota } = entrada;
+
+    if (!acumuladosPorTematica[tematicaId]) {
+      acumuladosPorTematica[tematicaId] = {
+        tematicaId,
+        tematicaNombre,
+        totalTests: 0,
+        sumaNotas: 0
+      };
+    }
+
+    acumuladosPorTematica[tematicaId].totalTests += 1;
+    acumuladosPorTematica[tematicaId].sumaNotas += nota;
+  }
+
+  return Object.values(acumuladosPorTematica).map(
+    ({ tematicaId, tematicaNombre, totalTests, sumaNotas }) => ({
+      tematicaId,
+      tematicaNombre,
+      totalTests,
+      notaMedia: Number((sumaNotas / totalTests).toFixed(1))
+    })
+  );
+}
+
 aplicacion.use(cors());
 aplicacion.use(express.json());
 
@@ -161,6 +191,16 @@ aplicacion.post('/api/corregir', (peticion, respuesta) => {
   });
 
   respuesta.json({ aciertos, fallos, nota, detalle });
+});
+
+aplicacion.get('/api/historial', (peticion, respuesta) => {
+  const listaHistorial = obtenerHistorial();
+  const estadisticas = calcularEstadisticasHistorial(listaHistorial);
+
+  respuesta.json({
+    historial: listaHistorial,
+    estadisticas
+  });
 });
 
 const servidor = aplicacion.listen(PUERTO, () => {

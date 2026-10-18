@@ -99,10 +99,10 @@ El frontend y el backend se ejecutan como procesos independientes durante el des
 
 ### Historial de Cuestionarios
 El backend mantiene un registro en memoria de los cuestionarios completados.
-- **Almacenamiento:** Array en memoria en el servidor (se reinicia al apagar el servidor).
+- **Almacenamiento:** Array en memoria en el servidor. El historial es volátil (se pierde al reiniciar el servidor) y compartido por todos los clientes, por lo que las estadísticas mostradas agregan las partidas de todos los usuarios.
 - **Alimentación:** El endpoint `POST /api/corregir` añade automáticamente una entrada al historial cada vez que se corrige un cuestionario con éxito.
-- **Consultas:** La función `obtenerHistorial` permite leer el array, aunque de momento no se expone por ningún endpoint.
-- **Modelo de datos:**
+- **Consultas:** El endpoint `GET /api/historial` devuelve la lista completa de cuestionarios realizados (en orden cronológico ascendente) junto con las estadísticas calculadas por categoría (`totalTests` y `notaMedia`). Con el historial vacío, devuelve arrays vacíos (`historial: []` y `estadisticas: []`).
+- **Modelo de datos de una entrada del historial:**
 ```json
 {
   "id": "hist-1",
@@ -112,6 +112,30 @@ El backend mantiene un registro en memoria de los cuestionarios completados.
   "aciertos": 4,
   "total": 5,
   "nota": 8
+}
+```
+- **Respuesta de `GET /api/historial`:**
+```json
+{
+  "historial": [
+    {
+      "id": "hist-1",
+      "fecha": "2026-10-16T10:30:00.000Z",
+      "tematicaId": "cat-filosofia",
+      "tematicaNombre": "Filosofía",
+      "aciertos": 4,
+      "total": 5,
+      "nota": 8
+    }
+  ],
+  "estadisticas": [
+    {
+      "tematicaId": "cat-filosofia",
+      "tematicaNombre": "Filosofía",
+      "totalTests": 3,
+      "notaMedia": 7.3
+    }
+  ]
 }
 ```
 
