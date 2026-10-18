@@ -117,7 +117,11 @@ function PantallaPregunta({ tematicaId, preguntas, alSalir }) {
   if (cuestionarioFinalizado) {
     return (
       <main className="pantalla-cuestionario">
-        <ResumenCuestionario resultado={resultadoCuestionario} alSalir={alSalir} />
+        <ResumenCuestionario
+          resultado={resultadoCuestionario}
+          preguntas={preguntas}
+          alSalir={alSalir}
+        />
       </main>
     )
   }
