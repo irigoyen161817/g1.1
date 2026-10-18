@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import ControlesPregunta from './ControlesPregunta'
-import PantallaFinalCuestionario from './PantallaFinalCuestionario'
+import ResumenCuestionario from './ResumenCuestionario'
 import ProgresoCuestionario from './ProgresoCuestionario'
 import TarjetaPregunta from './TarjetaPregunta'
 
@@ -72,6 +72,7 @@ function PantallaPregunta({ tematicaId, preguntas, alSalir }) {
         typeof datosResultado !== 'object' ||
         typeof datosResultado.aciertos !== 'number' ||
         typeof datosResultado.fallos !== 'number' ||
+        typeof datosResultado.nota !== 'number' ||
         !Array.isArray(datosResultado.detalle)
       ) {
         throw new Error('Formato de respuesta inválido del servidor')
@@ -116,12 +117,7 @@ function PantallaPregunta({ tematicaId, preguntas, alSalir }) {
   if (cuestionarioFinalizado) {
     return (
       <main className="pantalla-cuestionario">
-        <PantallaFinalCuestionario
-          resultado={resultadoCuestionario}
-          totalPreguntas={preguntas.length}
-          preguntas={preguntas}
-          alSalir={alSalir}
-        />
+        <ResumenCuestionario resultado={resultadoCuestionario} alSalir={alSalir} />
       </main>
     )
   }

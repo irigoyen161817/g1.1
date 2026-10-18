@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Encabezado from './Encabezado'
+import { formatearNota } from '../utils'
 import './PanelHistorial.css'
 
 // El historial en memoria del backend crece con cada cuestionario y no se pagina, así que
@@ -12,10 +13,6 @@ function formatearFecha(fechaIso) {
     month: 'short',
     year: 'numeric',
   })
-}
-
-function formatearNota(nota) {
-  return nota.toLocaleString('es-ES', { maximumFractionDigits: 1 })
 }
 
 function obtenerClaseNota(nota) {
