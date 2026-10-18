@@ -5,6 +5,7 @@
   "description": "Monorepo proyecto G1.1",
   "scripts": {
     "prepare": "husky",
+    "start": "node scripts/iniciar.js",
     "lint:frontend": "npm run lint --prefix frontend",
     "lint:backend": "npm run lint --prefix backend",
     "lint": "npm run lint:frontend && npm run lint:backend",
