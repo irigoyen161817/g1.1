@@ -9,3 +9,11 @@ export function formatearFecha(fechaIso) {
 export function formatearNota(nota) {
   return nota.toLocaleString('es-ES', { maximumFractionDigits: 1 })
 }
+
+export function obtenerClaseNota(nota) {
+  if (nota >= 8) {
+    return 'nota-alta'
+  }
+
+  return nota >= 5 ? 'nota-media' : 'nota-baja'
+}

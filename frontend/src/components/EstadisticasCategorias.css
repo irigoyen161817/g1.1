@@ -1,0 +1,41 @@
+.estadisticas-categorias {
+  width: 100%;
+  font-size: 12px;
+}
+
+.etiqueta-categoria {
+  fill: var(--color-texto-secundario);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.etiqueta-categoria-tests {
+  fill: var(--color-texto-suave);
+  font-weight: 400;
+}
+
+.barra-nota-alta {
+  fill: var(--color-exito);
+}
+
+.barra-nota-media {
+  fill: var(--color-acento);
+}
+
+.barra-nota-baja {
+  fill: var(--color-error);
+}
+
+.estadisticas-categorias-vacio {
+  margin: 0;
+  color: var(--color-texto-suave);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (min-width: 768px) {
+  .estadisticas-categorias,
+  .etiqueta-categoria {
+    font-size: 14px;
+  }
+}
