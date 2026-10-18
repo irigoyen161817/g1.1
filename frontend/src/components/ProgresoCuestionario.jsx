@@ -1,3 +1,5 @@
+import './ProgresoCuestionario.css'
+
 function ProgresoCuestionario({ numeroPregunta, totalPreguntas, respuestas }) {
   const porcentajeCompletado =
     totalPreguntas > 0 ? ((numeroPregunta + 1) / totalPreguntas) * 100 : 0

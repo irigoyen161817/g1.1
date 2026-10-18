@@ -1,3 +1,5 @@
+import './ControlesPregunta.css'
+
 function ControlesPregunta({
   puedeRetroceder,
   puedeAvanzar,
