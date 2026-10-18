@@ -1,7 +1,8 @@
+import DetallePregunta from './DetallePregunta'
 import { formatearNota } from '../utils'
 
-function ResumenCuestionario({ resultado, alSalir }) {
-  const { aciertos, fallos, nota } = resultado
+function ResumenCuestionario({ resultado, preguntas, alSalir }) {
+  const { aciertos, fallos, nota, detalle } = resultado
   const totalPreguntas = aciertos + fallos
 
   return (
@@ -28,6 +29,27 @@ function ResumenCuestionario({ resultado, alSalir }) {
           </div>
         </div>
       </div>
+
+      {detalle.length > 0 && (
+        <div className="contenedor-detalle-preguntas">
+          <div className="lista-detalles-preguntas">
+            <h2 className="titulo-detalles">Detalle de respuestas</h2>
+            {detalle.map((detalleItem, indice) => {
+              const preguntaCorrespondiente = preguntas.find(
+                (pregunta) => pregunta.id === detalleItem.idPregunta,
+              )
+              return (
+                <DetallePregunta
+                  key={detalleItem.idPregunta}
+                  numero={indice + 1}
+                  pregunta={preguntaCorrespondiente}
+                  detalle={detalleItem}
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <button className="boton-principal" type="button" onClick={alSalir}>
         Volver a las temáticas
