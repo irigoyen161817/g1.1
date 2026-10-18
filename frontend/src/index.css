@@ -1,4 +1,14 @@
 :root {
+  --color-primario: #4258e8;
+  --color-foco: rgba(66, 88, 232, 0.3);
+  --color-fondo: #f8f9fa;
+  --color-superficie: #ffffff;
+  --color-texto-base: #202326;
+  --color-texto-medio: #4b5563;
+  --color-texto-tenue: #6b7280;
+  --color-linea: #e5e7eb;
+  --color-linea-suave: #eef0f2;
+
   font-family:
     Inter,
     ui-sans-serif,
@@ -7,8 +17,8 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color: #202326;
-  background: #f8f9fa;
+  color: var(--color-texto-base);
+  background: var(--color-fondo);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,4 +36,48 @@ body {
 
 button {
   font: inherit;
+}
+
+.boton-secundario,
+.boton-principal {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-secundario {
+  border: 1px solid #d1d5db;
+  color: var(--color-texto-medio);
+  background: var(--color-superficie);
+}
+
+.boton-principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid var(--color-primario);
+  color: var(--color-superficie);
+  background: var(--color-primario);
+}
+
+.boton-secundario:disabled,
+.boton-principal:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.boton-secundario:focus-visible,
+.boton-principal:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .boton-secundario,
+  .boton-principal {
+    width: 100%;
+  }
 }
