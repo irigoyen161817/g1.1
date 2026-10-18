@@ -1,0 +1,139 @@
+.pantalla-final {
+  display: flex;
+  max-width: 640px;
+  min-height: 520px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.icono-final {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-superficie);
+  background: var(--color-primario);
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.pantalla-final h1 {
+  margin: 0;
+  font-size: 36px;
+  letter-spacing: -1px;
+}
+
+.pantalla-final p {
+  margin: 0 0 16px;
+  color: var(--color-texto-medio);
+}
+
+.bloque-puntuacion {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 420px;
+  margin: 8px 0 24px;
+}
+
+.tarjeta-nota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-linea);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.etiqueta-nota {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-texto-tenue);
+}
+
+.valor-nota {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primario);
+}
+
+.estadisticas-resumen {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.item-estadistica {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  background: var(--color-superficie);
+  border-radius: 12px;
+  border: 1px solid var(--color-linea);
+}
+
+.item-estadistica.aciertos {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.item-estadistica.fallos {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.etiqueta-estadistica {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto-medio);
+}
+
+.valor-estadistica {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.item-estadistica.aciertos .valor-estadistica {
+  color: #16a34a;
+}
+
+.item-estadistica.fallos .valor-estadistica {
+  color: #dc2626;
+}
+
+.contenedor-detalle-preguntas {
+  width: 100%;
+  max-width: 640px;
+}
+
+.lista-detalles-preguntas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin: 16px 0 32px;
+  text-align: left;
+}
+
+.titulo-detalles {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}

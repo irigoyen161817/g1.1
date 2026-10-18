@@ -21,6 +21,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   margin-left: -12px;
   padding: 8px 12px;
   border: 0;
@@ -57,8 +58,8 @@
   border-radius: 9999px;
   color: var(--color-acento);
   background: var(--color-acento-suave);
-  font-size: 11px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -186,8 +187,8 @@
 
 .etiqueta-resumen {
   color: var(--color-texto-suave);
-  font-size: 11px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;

@@ -1,4 +1,5 @@
 import OpcionRespuesta from './OpcionRespuesta'
+import './TarjetaPregunta.css'
 
 function TarjetaPregunta({ pregunta, respuestaSeleccionada, alSeleccionarRespuesta }) {
   return (

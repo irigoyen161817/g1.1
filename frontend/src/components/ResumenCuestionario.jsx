@@ -1,5 +1,6 @@
 import DetallePregunta from './DetallePregunta'
 import { formatearNota } from '../utils'
+import './ResumenCuestionario.css'
 
 function ResumenCuestionario({ resultado, preguntas, alSalir }) {
   const { aciertos, fallos, nota, detalle } = resultado
