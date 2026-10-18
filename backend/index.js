@@ -4,6 +4,7 @@ const datosPreguntas = require('./datos/preguntas.json');
 
 const aplicacion = express();
 const PUERTO = process.env.PUERTO || 3000;
+const PREGUNTAS_POR_CUESTIONARIO = 5;
 
 const historial = [];
 let contadorIdHistorial = 1;
@@ -101,7 +102,7 @@ aplicacion.get('/api/preguntas', (peticion, respuesta) => {
 
   const preguntas = [...categoria.preguntas]
     .sort(() => Math.random() - 0.5)
-    .slice(0, 5)
+    .slice(0, PREGUNTAS_POR_CUESTIONARIO)
     .map((pregunta) => {
       const preguntaPublica = { ...pregunta };
       delete preguntaPublica.respuestaCorrecta;
@@ -130,9 +131,13 @@ aplicacion.post('/api/corregir', (peticion, respuesta) => {
     return;
   }
 
-  if (respuestas.length !== categoria.preguntas.length) {
+  // GET /api/preguntas sirve un subconjunto de la tematica, asi que se esperan tantas respuestas
+  // como preguntas tiene un cuestionario (o todas si la tematica tiene menos), no el total
+  const respuestasEsperadas = Math.min(PREGUNTAS_POR_CUESTIONARIO, categoria.preguntas.length);
+
+  if (respuestas.length !== respuestasEsperadas) {
     respuesta.status(400).json({
-      error: 'Las respuestas enviadas estan incompletas'
+      error: `Se esperaban ${respuestasEsperadas} respuestas y se han recibido ${respuestas.length}`
     });
     return;
   }
