@@ -1,20 +1,13 @@
 import { useEffect, useState } from 'react'
 import Encabezado from './Encabezado'
-import './PanelHistorial.css'
+import EstadisticasCategorias from './EstadisticasCategorias'
 import EvolucionHistorial from './EvolucionHistorial'
-import { formatearFecha, formatearNota } from '../utils'
+import { formatearFecha, formatearNota, obtenerClaseNota } from '../utils'
+import './PanelHistorial.css'
 
 // El historial en memoria del backend crece con cada cuestionario y no se pagina, así que
 // el panel solo pinta las 10 partidas más recientes para que la lista no crezca sin límite
 const MAXIMO_PARTIDAS_RECIENTES = 10
-
-function obtenerClaseNota(nota) {
-  if (nota >= 8) {
-    return 'nota-alta'
-  }
-
-  return nota >= 5 ? 'nota-media' : 'nota-baja'
-}
 
 function PanelHistorial({ alVolver }) {
   const [historial, setHistorial] = useState([])
@@ -154,18 +147,21 @@ function PanelHistorial({ alVolver }) {
               </div>
 
               <div className="espacios-reservados">
-                <section id="contenedor-evolucion" aria-labelledby="titulo-evolucion">
+                <section
+                  className="seccion-grafica"
+                  id="contenedor-evolucion"
+                  aria-labelledby="titulo-evolucion"
+                >
                   <h2 id="titulo-evolucion">Evolución de las notas</h2>
                   <EvolucionHistorial historial={historial} />
                 </section>
                 <section
-                  className="espacio-reservado"
+                  className="seccion-grafica"
                   id="contenedor-estadisticas-categoria"
                   aria-labelledby="titulo-categorias"
                 >
                   <h2 id="titulo-categorias">Estadísticas por categoría</h2>
-                  <p>[Espacio reservado para las estadísticas de cada temática]</p>
-                  <p>Temáticas con tests realizados: {estadisticas.length}</p>
+                  <EstadisticasCategorias estadisticas={estadisticas} />
                 </section>
               </div>
 
