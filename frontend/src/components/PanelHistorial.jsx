@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react'
 import Encabezado from './Encabezado'
-import { formatearNota } from '../utils'
 import './PanelHistorial.css'
+import EvolucionHistorial from './EvolucionHistorial'
+import { formatearFecha, formatearNota } from '../utils'
 
 // El historial en memoria del backend crece con cada cuestionario y no se pagina, así que
 // el panel solo pinta las 10 partidas más recientes para que la lista no crezca sin límite
 const MAXIMO_PARTIDAS_RECIENTES = 10
-
-function formatearFecha(fechaIso) {
-  return new Date(fechaIso).toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
 
 function obtenerClaseNota(nota) {
   if (nota >= 8) {
@@ -161,13 +154,9 @@ function PanelHistorial({ alVolver }) {
               </div>
 
               <div className="espacios-reservados">
-                <section
-                  className="espacio-reservado"
-                  id="contenedor-evolucion"
-                  aria-labelledby="titulo-evolucion"
-                >
+                <section id="contenedor-evolucion" aria-labelledby="titulo-evolucion">
                   <h2 id="titulo-evolucion">Evolución de las notas</h2>
-                  <p>[Espacio reservado para la gráfica de evolución]</p>
+                  <EvolucionHistorial historial={historial} />
                 </section>
                 <section
                   className="espacio-reservado"

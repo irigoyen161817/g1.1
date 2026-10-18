@@ -1,0 +1,33 @@
+.evolucion-historial {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--color-contenedor);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.evolucion-historial.vacio {
+  text-align: center;
+  color: var(--color-texto-suave);
+  font-style: italic;
+}
+
+.mensaje-grafica {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--color-contenedor);
+  border-radius: 6px;
+  color: var(--color-texto);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-borde);
+}
+
+.grafica-contenedor {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+  .evolucion-historial {
+    padding: 1rem;
+  }
+}
