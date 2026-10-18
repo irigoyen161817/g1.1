@@ -3,7 +3,6 @@ import AccesoHistorial from './AccesoHistorial'
 import Encabezado from './Encabezado'
 import PantallaPregunta from './PantallaPregunta'
 import TarjetaTematica from './TarjetaTematica'
-import './SeleccionTematica.css'
 
 function SeleccionTematica({ alVerHistorial }) {
   const [tematicas, setTematicas] = useState([])

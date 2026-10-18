@@ -3,7 +3,6 @@ import ControlesPregunta from './ControlesPregunta'
 import ResumenCuestionario from './ResumenCuestionario'
 import ProgresoCuestionario from './ProgresoCuestionario'
 import TarjetaPregunta from './TarjetaPregunta'
-import './PantallaPregunta.css'
 
 function crearRespuestasIniciales(totalPreguntas) {
   return Array.from({ length: totalPreguntas }, () => null)

@@ -1,5 +1,3 @@
-import './DetallePregunta.css'
-
 function DetallePregunta({ numero, pregunta, detalle }) {
   const { esCorrecta, respuestaSeleccionada, respuestaCorrecta } = detalle
   const { enunciado, opciones } = pregunta
