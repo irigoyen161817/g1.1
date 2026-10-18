@@ -1,6 +1,6 @@
 # Proyecto EduQuest G1.1
 
-Proyecto de desarrollo de la asignatura GPI1.
+Proyecto de desarrollo de la asignatura GPI1. EduQuest es una aplicación de cuestionarios por temáticas: el usuario elige una temática, responde a sus preguntas, recibe la corrección con su nota y puede consultar su historial y sus estadísticas.
 
 ## Requisitos
 
@@ -22,103 +22,178 @@ Este comando instala o actualiza las dependencias de la raíz, `backend` y `fron
 
 Pulsa `Ctrl+C` para detener los dos a la vez. Si uno de ellos se detiene de forma inesperada, el otro también se detiene. Se puede volver a ejecutar en cualquier momento, por ejemplo después de cambiar de rama, para sincronizar las dependencias con los `package-lock.json`.
 
-## Instalación
+### Ejecución por separado
 
-Si prefieres instalar y ejecutar cada aplicación por separado, el proyecto está dividido en dos aplicaciones independientes. Es necesario instalar las dependencias de cada una:
+Si prefieres instalar y lanzar cada aplicación en su propia terminal:
 
 ```bash
+npm install            # en la raíz, activa los hooks de Husky
+
 cd backend
 npm install
-```
+npm run dev            # o npm start, sin reinicio automático
 
-```bash
 cd frontend
 npm install
-```
-
-## Ejecución
-
-### Backend
-
-Desde la carpeta `backend`:
-
-```bash
-npm start
-```
-
-El servidor estará disponible en `http://localhost:3000`.
-
-Para ejecutarlo en modo desarrollo con reinicio automático:
-
-```bash
 npm run dev
 ```
 
-### Frontend
+## Configuración
 
-Desde la carpeta `frontend`:
+| Elemento     | Dónde                     | Valor por defecto       | Descripción                                                                                                                            |
+| :----------- | :------------------------ | :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUERTO`     | Variable de entorno       | `3000`                  | Puerto en el que escucha el backend.                                                                                                   |
+| Proxy `/api` | `frontend/vite.config.js` | `http://localhost:3000` | En desarrollo, Vite reenvía al backend todas las peticiones que empiezan por `/api`, así que el frontend usa rutas relativas sin CORS. |
 
-```bash
-npm run dev
-```
+Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.config.js`.
 
-Vite mostrará en la terminal la dirección local donde se sirve la aplicación, normalmente `http://localhost:5173`.
+## Otros comandos
+
+| Ubicación  | Comando                | Qué hace                                             |
+| :--------- | :--------------------- | :--------------------------------------------------- |
+| Raíz       | `npm run lint`         | Ejecuta ESLint en frontend y backend.                |
+| Raíz       | `npm run format`       | Aplica Prettier a frontend y backend.                |
+| Raíz       | `npm run format:check` | Comprueba el formato sin modificar archivos.         |
+| `frontend` | `npm run build`        | Genera la versión de producción en `frontend/dist/`. |
+| `frontend` | `npm run preview`      | Sirve localmente la versión generada con `build`.    |
+
+`backend` y `frontend` también tienen sus propios `lint`, `format` y `format:check`.
 
 ## Calidad y formato del código
 
-Cada aplicación usa ESLint para detectar errores y Prettier para imponer el formato. Desde la raíz del repositorio (tras ejecutar `npm install` para activar Husky) están disponibles estos comandos:
+- **ESLint** detecta errores en cada aplicación y **Prettier** impone el formato, con `eslint-config-prettier` para que no choquen. La configuración de `.prettierrc.json` respeta el estilo de cada aplicación: el backend con punto y coma y sin comas finales, el frontend sin punto y coma y con comas finales. Ambas usan comillas simples, 2 espacios de sangría y un ancho de 100 columnas. `backend/datos/` queda excluido del formateo.
+- **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
+  - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
+  - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
+- **GitLab CI** (`.gitlab-ci.yml`, imagen `node:20-alpine`): el stage `lint` ejecuta `lint` y `format:check` en frontend y backend, y el stage `build` compila el frontend. Una MR no puede fusionarse hasta que el pipeline termine en verde.
 
-```bash
-npm run lint           # ESLint en frontend y backend
-npm run format         # aplica Prettier a frontend y backend
-npm run format:check   # comprueba el formato sin modificar archivos
-```
-
-El hook `pre-commit` y el pipeline de GitLab CI ejecutan `format:check`, por lo que un código sin formatear impide el commit y hace fallar el stage `lint`.
+Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
 ## Arquitectura base
 
-El proyecto utiliza una arquitectura separada en dos aplicaciones:
+EduQuest está dividido en dos aplicaciones independientes que se ejecutan como procesos separados: un backend en Node.js con Express que sirve la API y los datos, y un frontend en React con Vite que consume esa API.
 
-- `backend/`: servidor HTTP desarrollado con Node.js y Express. El punto de entrada es `index.js` y expone endpoints de la API como `GET /api/tematicas`, `GET /api/preguntas`, `POST /api/corregir` y `GET /api/historial`.
-  - **Preguntas por cuestionario (decisión técnica):** la constante `PREGUNTAS_POR_CUESTIONARIO` (5) de `index.js` fija cuántas preguntas al azar sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir` (todas las de la temática si tiene menos), de modo que una temática puede tener más preguntas en `datos/preguntas.json` sin que dejen de poder corregirse sus cuestionarios.
-- `frontend/`: aplicación cliente desarrollada con React y Vite. El código principal se encuentra en `src/`, con `App.jsx` como componente principal y `main.jsx` como punto de entrada. La selección de temáticas se gestiona desde `components/SeleccionTematica.jsx` y el cuestionario se coordina desde `components/PantallaPregunta.jsx`, acompañado de componentes independientes para el progreso, las opciones, la navegación, la pantalla de resumen (`components/ResumenCuestionario.jsx`) y el detalle de preguntas acertadas y falladas (`components/DetallePregunta.jsx`). La visualización de la evolución del usuario se dibuja mediante gráficas utilizando la librería `recharts` en el componente `components/EvolucionHistorial.jsx`.
-  - **Flujo de corrección de cuestionarios y resumen:** al elegir una temática en `SeleccionTematica`, se propagan como props hacia `PantallaPregunta` el `tematicaId`, las `preguntas` y el callback `alSalir`. Tras responder a la última pregunta, el cliente envía una petición `POST /api/corregir` con el cuerpo `{ tematicaId, respuestas: [{ idPregunta, indiceRespuesta }] }`. Al recibir la respuesta del servidor, `PantallaPregunta` valida que incluya `aciertos`, `fallos` y `nota` numéricos y `detalle` como lista, y pasa las props `resultado`, `preguntas` y `alSalir` a `ResumenCuestionario`, que presenta la puntuación final (`nota/10`), las métricas de aciertos y fallos (el total de preguntas se obtiene como `aciertos + fallos`), el detalle de cada pregunta mediante `DetallePregunta` (enunciado, respuesta elegida y, en los fallos, la respuesta correcta, cruzando `detalle[].idPregunta` con las `preguntas` recibidas) y la acción para volver a la selección de temáticas reiniciando el cuestionario.
-  - **Formato del código:** ambas aplicaciones usan Prettier (con `eslint-config-prettier` para evitar conflictos con ESLint) y una configuración propia en `.prettierrc.json` que respeta el estilo que ya tenía cada una: el backend con punto y coma y sin comas finales, el frontend sin punto y coma y con comas finales. Ambas usan comillas simples, 2 espacios de sangría y un ancho de 100 columnas. `backend/datos/` queda excluido del formateo.
-  - **Navegación entre vistas e historial:** `App.jsx` mantiene en el estado `vistaActiva` si se muestra la selección de temáticas (`SeleccionTematica`) o el panel de historial (`components/PanelHistorial.jsx`), sin librería de rutas. El botón `Ver historial` vive en `components/AccesoHistorial.jsx`, que `SeleccionTematica` renderiza con el callback `alVerHistorial`; `PanelHistorial` recibe `alVolver` para regresar. El panel carga `GET /api/historial` (`historial` y `estadisticas`), cancela la petición si se sale de él mientras carga, gestiona los estados de carga, error con reintento e historial vacío, y pinta en `contenedor-evolucion` la gráfica de evolución de las notas (`EvolucionHistorial`) y en `contenedor-estadisticas-categoria` las estadísticas por categoría (`EstadisticasCategorias`).
-  - **Estadísticas por categoría:** `components/EstadisticasCategorias.jsx` recibe `estadisticas` por props y dibuja con `recharts` (`BarChart` dentro de `ResponsiveContainer`) una barra por temática con su `notaMedia` tal como la devuelve el backend, sin recalcularla, y el eje Y de 0 a 10. Bajo cada barra muestra el nombre de la temática y el número de tests (`totalTests`), que también aparecen en el tooltip. Las barras se colorean según la nota con el mismo criterio que las partidas del historial (`obtenerClaseNota`), y si no hay estadísticas se muestra un mensaje. Como el texto SVG no hace saltos de línea, los nombres largos se dividen en varias líneas para que las etiquetas no se solapen en móvil. Sus estilos están en `components/EstadisticasCategorias.css` (mobile first).
-  - **Gráficos (dependencia):** `recharts` es la librería de gráficos del frontend.
-  - **Límite de partidas recientes (decisión técnica):** el historial en memoria del backend crece con cada cuestionario y no está paginado, por lo que el panel muestra como máximo las 10 partidas más recientes (constante `MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
-  - **Diseño de temáticas e historial:** estas dos pantallas siguen el diseño "Cognitive Clarity". Sus colores y fuentes se definen como variables CSS en `src/vistaDiseno.css`, con ámbito en la clase `.vista-diseno` (no en `:root`), de modo que el resto de la aplicación conserva su estilo. Los estilos propios están en `components/PanelHistorial.css` y `components/AccesoHistorial.css` (mobile first).
-  - **Tipografía:** Hanken Grotesk y Space Grotesk se sirven desde el propio proyecto con las dependencias `@fontsource/hanken-grotesk` y `@fontsource/space-grotesk` (importadas en `src/main.jsx`), sin peticiones a servicios externos.
-  - **Organización de estilos CSS (decisión técnica):** los estilos del frontend están modularizados por componente. Cada componente cuenta con su propio archivo CSS con el mismo nombre en `PascalCase` importado directamente desde su `.jsx` (ej. `Encabezado.css`, `SeleccionTematica.css`, `TarjetaTematica.css`, `PantallaPregunta.css`, `ProgresoCuestionario.css`, `TarjetaPregunta.css`, `OpcionRespuesta.css`, `ControlesPregunta.css`, `ResumenCuestionario.css` y `DetallePregunta.css`), incluyendo dentro de cada archivo sus respectivas reglas de media queries (`@media`). El archivo `src/index.css` se reserva únicamente para el reset CSS, las variables globales de color en `:root` (`--color-primario`, `--color-foco`, `--color-fondo`, `--color-superficie`, `--color-texto-base`, `--color-texto-medio`, `--color-texto-tenue`, `--color-linea` y `--color-linea-suave`, que usan los CSS de los componentes en lugar de repetir los valores), los estilos base del documento y los estilos de botones reutilizables compartidos (`.boton-principal` y `.boton-secundario`), mientras que `src/vistaDiseno.css` define las variables de color y tipografía del diseño "Cognitive Clarity" con ámbito en la clase `.vista-diseno`.
-  - **Utilidades de formato:** `src/utils.js` reúne las funciones de formato compartidas. `formatearNota` muestra la nota con formato `es-ES` (coma decimal y como máximo un decimal) y la usan tanto `ResumenCuestionario` como `PanelHistorial`, para que una misma partida se vea igual en el resumen y en el historial. `formatearFecha` hace lo propio para la visualización de fechas en el historial. `obtenerClaseNota` devuelve la clase de color de una nota (`nota-alta` desde 8, `nota-media` desde 5 y `nota-baja` por debajo), compartida por las partidas del historial y las barras de `EstadisticasCategorias`.
-- `scripts/`: scripts auxiliares del proyecto.
-  - **Arranque único (`scripts/iniciar.js`, `npm start` en la raíz):** script de Node sin dependencias externas, para que funcione en un clon recién hecho antes de instalar nada. Ejecuta `npm install` en la raíz, `backend/` y `frontend/`, y lanza `npm run dev` en las dos aplicaciones. Al pulsar `Ctrl+C`, o si uno de los dos servidores termina, detiene ambos: en Windows mata el árbol de procesos con `taskkill /T` y en macOS/Linux lanza cada servidor en su propio grupo de procesos, para no dejar servidores huérfanos ocupando los puertos.
-- `.gitlab/`: configuración y plantillas utilizadas por GitLab.
-- `.husky/`: hooks de Git para automatizar comprobaciones del flujo de trabajo.
-- `CONTRIBUTING.md`: convenciones de nomenclatura, calidad y contribución.
+```mermaid
+flowchart LR
+  Navegador["Navegador"] --> Vite["Frontend<br/>React + Vite :5173"]
+  Vite -- "proxy /api" --> Express["Backend<br/>Express :3000"]
+  Express --> Datos[("datos/preguntas.json")]
+  Express --> Historial[("Historial en memoria")]
+```
 
-El frontend y el backend se ejecutan como procesos independientes durante el desarrollo. La comunicación entre ambos se ampliará mediante endpoints de la API y la configuración correspondiente de Vite a medida que avance el proyecto.
+### Estructura de carpetas
 
-### Historial de Cuestionarios
-El backend mantiene un registro en memoria de los cuestionarios completados.
-- **Almacenamiento:** Array en memoria en el servidor. El historial es volátil (se pierde al reiniciar el servidor) y compartido por todos los clientes, por lo que las estadísticas mostradas agregan las partidas de todos los usuarios.
-- **Alimentación:** El endpoint `POST /api/corregir` añade automáticamente una entrada al historial cada vez que se corrige un cuestionario con éxito.
-- **Consultas:** El endpoint `GET /api/historial` devuelve la lista completa de cuestionarios realizados (en orden cronológico ascendente) junto con las estadísticas calculadas por categoría (`totalTests` y `notaMedia`). Con el historial vacío, devuelve arrays vacíos (`historial: []` y `estadisticas: []`).
-- **Modelo de datos de una entrada del historial:**
+```text
+g1.1/
+├── backend/
+│   ├── index.js                servidor Express y endpoints de la API
+│   └── datos/
+│       └── preguntas.json      temáticas y preguntas
+├── frontend/
+│   ├── vite.config.js          configuración de Vite y proxy /api
+│   ├── public/
+│   │   └── tematicas/          logos de las temáticas
+│   └── src/
+│       ├── main.jsx            punto de entrada (importa las fuentes y index.css)
+│       ├── App.jsx             cambia entre la selección de temáticas y el historial
+│       ├── components/         un .jsx y un .css por componente
+│       ├── utils.js            funciones de formato compartidas
+│       ├── index.css           reset, variables globales y botones compartidos
+│       └── vistaDiseno.css     variables del diseño "Cognitive Clarity"
+├── scripts/                    arranque único y validadores de los hooks
+├── .gitlab/                    plantillas de merge request
+├── .husky/                     hooks de Git
+├── .gitlab-ci.yml              pipeline de CI
+└── CONTRIBUTING.md             convenciones del proyecto
+```
+
+### Backend
+
+El punto de entrada es `backend/index.js`. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
+
+| Método | Ruta             | Parámetros                                                           |
+| :----- | :--------------- | :------------------------------------------------------------------- |
+| GET    | `/api/tematicas` | —                                                                    |
+| GET    | `/api/preguntas` | Query `id` o `tematica` (nombre, sin distinguir mayúsculas)          |
+| POST   | `/api/corregir`  | Body `{ tematicaId, respuestas: [{ idPregunta, indiceRespuesta }] }` |
+| GET    | `/api/historial` | —                                                                    |
+| GET    | `/api/mensajes`  | —                                                                    |
+
+Cuando una petición falla, la respuesta lleva el código de error HTTP y un cuerpo con el motivo, por ejemplo `{ "error": "La tematica solicitada no existe" }`.
+
+#### `GET /api/tematicas`
+
+Devuelve todas las temáticas, sin sus preguntas.
+
+```json
+[
+  {
+    "id": "cat-filosofia",
+    "nombre": "Filosofía",
+    "descripcion": "Preguntas sobre historia de la filosofía, autores y corrientes de pensamiento",
+    "logo": "/tematicas/filosofia.svg"
+  }
+]
+```
+
+#### `GET /api/preguntas?id=cat-filosofia`
+
+Devuelve 5 preguntas de la temática al azar (todas si tiene menos), sin `respuestaCorrecta` para que el cliente no pueda ver la solución. En el ejemplo se muestra solo la primera. Si la temática no existe responde `404`.
+
+```json
+[
+  {
+    "id": "preg-fil-01",
+    "enunciado": "¿Qué filósofo propuso el método dialéctico basado en preguntas sucesivas conocido como mayéutica?",
+    "opciones": ["Sócrates", "Platón", "Aristóteles", "Heráclito"]
+  }
+]
+```
+
+#### `POST /api/corregir`
+
+Corrige las respuestas y registra la partida en el historial. Cada respuesta indica la pregunta y el índice de la opción elegida (de 0 a 3). Ejemplo de cuerpo:
+
 ```json
 {
-  "id": "hist-1",
-  "fecha": "2026-10-16T10:30:00.000Z",
   "tematicaId": "cat-filosofia",
-  "tematicaNombre": "Filosofía",
-  "aciertos": 4,
-  "total": 5,
-  "nota": 8
+  "respuestas": [
+    { "idPregunta": "preg-fil-01", "indiceRespuesta": 0 },
+    { "idPregunta": "preg-fil-02", "indiceRespuesta": 2 }
+  ]
 }
 ```
-- **Respuesta de `GET /api/historial`:**
+
+Respuesta (en el ejemplo, el detalle de solo dos preguntas):
+
+```json
+{
+  "aciertos": 4,
+  "fallos": 1,
+  "nota": 8,
+  "detalle": [
+    {
+      "idPregunta": "preg-fil-01",
+      "respuestaSeleccionada": 0,
+      "respuestaCorrecta": 0,
+      "esCorrecta": true
+    },
+    {
+      "idPregunta": "preg-fil-02",
+      "respuestaSeleccionada": 2,
+      "respuestaCorrecta": 0,
+      "esCorrecta": false
+    }
+  ]
+}
+```
+
+La `nota` es sobre 10 con un decimal. Responde `400` si el cuerpo no es válido, el número de respuestas no coincide con las preguntas del cuestionario (5, o todas las de la temática si tiene menos), hay preguntas repetidas o algún índice no es un entero entre 0 y 3, y `404` si no existe la temática o alguna pregunta.
+
+#### `GET /api/historial`
+
+Devuelve las partidas corregidas en orden cronológico ascendente y las estadísticas por temática (`totalTests` y `notaMedia`). Con el historial vacío, los dos arrays llegan vacíos.
+
 ```json
 {
   "historial": [
@@ -142,6 +217,69 @@ El backend mantiene un registro en memoria de los cuestionarios completados.
   ]
 }
 ```
+
+El historial se guarda en un array en memoria del backend. Es volátil (se pierde al reiniciar el servidor) y compartido por todos los clientes, por lo que las estadísticas agregan las partidas de todos los usuarios.
+
+#### `GET /api/mensajes`
+
+Sirve para comprobar que el backend responde; el frontend no lo usa.
+
+```json
+{
+  "estado": "conectado",
+  "mensaje": "Servidor backend conectado exitosamente con el frontend",
+  "marcaTiempo": "2026-10-16T10:30:00.000Z"
+}
+```
+
+### Frontend
+
+La aplicación tiene cuatro pantallas. Así se pasa de una a otra:
+
+```mermaid
+flowchart LR
+  T[Temáticas] -->|elige temática| C[Cuestionario]
+  C -->|responde la última pregunta| R[Resumen]
+  R -->|volver| T
+  T <-->|ver historial / volver| H[Historial]
+```
+
+| Pantalla     | Componente principal  | Qué muestra                                                   | Componentes hijos                                                                      |
+| :----------- | :-------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
+| Temáticas    | `SeleccionTematica`   | Una tarjeta por temática y el botón para ver el historial     | `Encabezado`, `TarjetaTematica`, `AccesoHistorial`                                     |
+| Cuestionario | `PantallaPregunta`    | Una pregunta cada vez con su progreso                         | `ProgresoCuestionario`, `TarjetaPregunta` (con `OpcionRespuesta`), `ControlesPregunta` |
+| Resumen      | `ResumenCuestionario` | La nota, los aciertos y fallos, y el detalle de cada pregunta | `DetallePregunta`                                                                      |
+| Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos y las últimas partidas      | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
+
+- **Navegación:** no hay librería de rutas; `App.jsx` cambia entre temáticas e historial con un estado, y el cuestionario y el resumen se muestran dentro de la pantalla de temáticas.
+- **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha` y `obtenerClaseNota` (color de la nota), para que una misma nota se vea igual en el resumen, el historial y los gráficos.
+
+### Dependencias
+
+| Aplicación | Dependencia                                                 | Uso                                           |
+| :--------- | :---------------------------------------------------------- | :-------------------------------------------- |
+| Backend    | `express`                                                   | Servidor HTTP y API.                          |
+| Backend    | `cors`                                                      | Permite peticiones desde otro origen.         |
+| Backend    | `nodemon` (desarrollo)                                      | Reinicio automático con `npm run dev`.        |
+| Frontend   | `react`, `react-dom`                                        | Interfaz de usuario.                          |
+| Frontend   | `vite` (desarrollo)                                         | Servidor de desarrollo, proxy `/api` y build. |
+| Frontend   | `recharts`                                                  | Gráficos del historial.                       |
+| Frontend   | `@fontsource/hanken-grotesk`, `@fontsource/space-grotesk`   | Fuentes servidas desde el propio proyecto.    |
+| Ambas      | `eslint`, `prettier`, `eslint-config-prettier` (desarrollo) | Calidad y formato del código.                 |
+| Raíz       | `husky` (desarrollo)                                        | Hooks de Git.                                 |
+
+### Decisiones técnicas
+
+- **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
+- **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/index.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
+- **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.
+- **Navegación con estado, sin router:** solo hay dos vistas, así que un estado en `App.jsx` es suficiente.
+- **Máximo de 10 partidas recientes:** el historial no está paginado y crece con cada cuestionario, así que el panel limita la lista (`MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
+- **Un CSS por componente:** cada componente lleva sus estilos y media queries, y los colores repetidos se centralizan en variables globales para no duplicar valores.
+- **Variables de "Cognitive Clarity" con ámbito en `.vista-diseno`:** así el nuevo diseño se aplica solo a temáticas e historial sin cambiar el resto de pantallas.
+- **Fuentes locales con `@fontsource`:** evitan peticiones a servicios externos.
+- **Etiquetas de los gráficos en varias líneas:** el texto SVG no hace saltos de línea, así que los nombres largos de las temáticas se dividen para que no se solapen en móvil.
+- **Arranque único sin dependencias (`scripts/iniciar.js`):** funciona en un clon recién hecho antes de instalar nada. Al terminar detiene ambos servidores (en Windows con `taskkill /T` y en macOS/Linux con grupos de procesos) para no dejar puertos ocupados.
 
 ## Flujo de contribución
 
