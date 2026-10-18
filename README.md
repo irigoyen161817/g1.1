@@ -7,9 +7,24 @@ Proyecto de desarrollo de la asignatura GPI1.
 - Node.js 20 o superior.
 - npm.
 
+## Inicio rápido
+
+Desde la raíz del repositorio, con solo Node.js instalado:
+
+```bash
+npm start
+```
+
+Este comando instala o actualiza las dependencias de la raíz, `backend` y `frontend`, y después levanta los dos servidores en modo desarrollo en la misma terminal, con la salida de cada uno etiquetada como `[backend]` o `[frontend]`:
+
+- Backend: `http://localhost:3000`
+- Frontend: `http://localhost:5173`
+
+Pulsa `Ctrl+C` para detener los dos a la vez. Si uno de ellos se detiene de forma inesperada, el otro también se detiene. Se puede volver a ejecutar en cualquier momento, por ejemplo después de cambiar de rama, para sincronizar las dependencias con los `package-lock.json`.
+
 ## Instalación
 
-El proyecto está dividido en dos aplicaciones independientes. Es necesario instalar las dependencias de cada una:
+Si prefieres instalar y ejecutar cada aplicación por separado, el proyecto está dividido en dos aplicaciones independientes. Es necesario instalar las dependencias de cada una:
 
 ```bash
 cd backend
@@ -74,6 +89,7 @@ El proyecto utiliza una arquitectura separada en dos aplicaciones:
   - **Diseño de temáticas e historial:** estas dos pantallas siguen el diseño "Cognitive Clarity". Sus colores y fuentes se definen como variables CSS en `src/vistaDiseno.css`, con ámbito en la clase `.vista-diseno` (no en `:root`), de modo que el resto de la aplicación conserva su estilo. Los estilos propios están en `components/PanelHistorial.css` y `components/AccesoHistorial.css` (mobile first).
   - **Tipografía:** Hanken Grotesk y Space Grotesk se sirven desde el propio proyecto con las dependencias `@fontsource/hanken-grotesk` y `@fontsource/space-grotesk` (importadas en `src/main.jsx`), sin peticiones a servicios externos.
 - `scripts/`: scripts auxiliares del proyecto.
+  - **Arranque único (`scripts/iniciar.js`, `npm start` en la raíz):** script de Node sin dependencias externas, para que funcione en un clon recién hecho antes de instalar nada. Ejecuta `npm install` en la raíz, `backend/` y `frontend/`, y lanza `npm run dev` en las dos aplicaciones. Al pulsar `Ctrl+C`, o si uno de los dos servidores termina, detiene ambos: en Windows mata el árbol de procesos con `taskkill /T` y en macOS/Linux lanza cada servidor en su propio grupo de procesos, para no dejar servidores huérfanos ocupando los puertos.
 - `.gitlab/`: configuración y plantillas utilizadas por GitLab.
 - `.husky/`: hooks de Git para automatizar comprobaciones del flujo de trabajo.
 - `CONTRIBUTING.md`: convenciones de nomenclatura, calidad y contribución.
