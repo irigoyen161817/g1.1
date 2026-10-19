@@ -104,7 +104,8 @@ g1.1/
 ├── .gitlab/                    plantillas de merge request
 ├── .husky/                     hooks de Git
 ├── .gitlab-ci.yml              pipeline de CI
-└── CONTRIBUTING.md             convenciones del proyecto
+├── CONTRIBUTING.md             convenciones del proyecto
+└── sprint-backlog-eduquest.xlsx  product backlog, seguimiento de sprints y retrospectiva
 ```
 
 ### Backend
