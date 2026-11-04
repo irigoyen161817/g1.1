@@ -103,13 +103,13 @@ Todos los elementos de la base de datos se escribirán en español, en minúscul
 
 ---
 
-## 5. Flujo de Trabajo y Revisión de Código (Merge Requests)
+## 5. Flujo de Trabajo y Revisión de Código (Pull Requests)
 
 1. **Sincronizar:** Antes de empezar una tarea, situarse en `main` y descargar los últimos cambios (`git pull origin main`).
 2. **Crear rama:** Crear una rama nueva siguiendo la nomenclatura del punto 1 (`git checkout -b <tipo>/<id-tarea>-<descripcion>`).
 3. **Desarrollar y confirmar:** Realizar commits atómicos siguiendo la nomenclatura del punto 2 (`HHUUXX: <mensaje>`). Husky verificará automáticamente la rama, el mensaje del commit y las reglas de ESLint.
 4. **Subir rama:** Subir la rama al repositorio remoto (`git push -u origin <nombre-rama>`).
-5. **Revisión por pares y Merge Request (MR):**
-   - Abrir un **Merge Request** en GitLab desde la rama de la tarea hacia **`main`**.
+5. **Revisión por pares y Pull Request (PR):**
+   - Abrir una **Pull Request** en GitHub desde la rama de la tarea hacia **`main`**.
    - Asignar obligatoriamente a otro miembro del equipo como revisor (_Reviewer_).
-   - **Visto bueno obligatorio:** Ningún cambio puede fusionarse en `main` sin que otro miembro del equipo haya revisado el código (comprobando nomenclatura, comentarios y funcionamiento) y haya otorgado su aprobación (_Approve_) en GitLab.
+   - **Visto bueno obligatorio:** Ningún cambio puede fusionarse en `main` sin que otro miembro del equipo haya revisado el código (comprobando nomenclatura, comentarios y funcionamiento) y haya otorgado su aprobación (_Approve_) en GitHub.
