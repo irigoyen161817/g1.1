@@ -65,7 +65,7 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. El job `lint` ejecuta `lint` y `format:check` en frontend y backend, y el job `build` compila el frontend. Una pull request no puede fusionarse hasta que el workflow termine en verde.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo tres jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, y `build (frontend)` compila el frontend. Una pull request no puede fusionarse hasta que el workflow termine en verde.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
