@@ -65,7 +65,7 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitLab CI** (`.gitlab-ci.yml`, imagen `node:20-alpine`): el stage `lint` ejecuta `lint` y `format:check` en frontend y backend, y el stage `build` compila el frontend. Una MR no puede fusionarse hasta que el pipeline termine en verde.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo tres jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, y `build (frontend)` compila el frontend. Una pull request no puede fusionarse hasta que el workflow termine en verde.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
@@ -101,9 +101,8 @@ g1.1/
 │       ├── index.css           reset, variables globales y botones compartidos
 │       └── vistaDiseno.css     variables del diseño "Cognitive Clarity"
 ├── scripts/                    arranque único y validadores de los hooks
-├── .gitlab/                    plantillas de merge request
+├── .github/                    workflow de CI y plantilla de pull request
 ├── .husky/                     hooks de Git
-├── .gitlab-ci.yml              pipeline de CI
 ├── CONTRIBUTING.md             convenciones del proyecto
 └── sprint-backlog-eduquest.xlsx  product backlog, seguimiento de sprints y retrospectiva
 ```
@@ -281,7 +280,8 @@ flowchart LR
 - **Fuentes locales con `@fontsource`:** evitan peticiones a servicios externos.
 - **Etiquetas de los gráficos en varias líneas:** el texto SVG no hace saltos de línea, así que los nombres largos de las temáticas se dividen para que no se solapen en móvil.
 - **Arranque único sin dependencias (`scripts/iniciar.js`):** funciona en un clon recién hecho antes de instalar nada. Al terminar detiene ambos servidores (en Windows con `taskkill /T` y en macOS/Linux con grupos de procesos) para no dejar puertos ocupados.
+- **Migración de GitLab a GitHub:** el repositorio, las issues, las etiquetas y los milestones se trasladaron a GitHub conservando la numeración de las issues, para que las referencias `#N` de los commits sigan siendo válidas. El pipeline de GitLab CI se sustituyó por un workflow de GitHub Actions con los mismos pasos, y la rama `main` está protegida: exige pull request con una aprobación y el CI en verde.
 
 ## Flujo de contribución
 
-Las ramas, commits y merge requests deben seguir las reglas definidas en `CONTRIBUTING.md`. Todo cambio debe revisarse mediante una merge request antes de incorporarse a `main`.
+El repositorio está alojado en GitHub: https://github.com/irigoyen161817/g1.1. Las ramas, commits y pull requests deben seguir las reglas definidas en `CONTRIBUTING.md`. Todo cambio debe revisarse mediante una pull request antes de incorporarse a `main`.
