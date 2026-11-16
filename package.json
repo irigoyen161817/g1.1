@@ -14,7 +14,9 @@
     "format": "npm run format:frontend && npm run format:backend",
     "format:check:frontend": "npm run format:check --prefix frontend",
     "format:check:backend": "npm run format:check --prefix backend",
-    "format:check": "npm run format:check:frontend && npm run format:check:backend"
+    "format:check": "npm run format:check:frontend && npm run format:check:backend",
+    "test:backend": "npm run test --prefix backend",
+    "test": "npm run test:backend"
   },
   "devDependencies": {
     "husky": "^9.1.7"
