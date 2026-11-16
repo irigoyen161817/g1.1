@@ -1,0 +1,219 @@
+const express = require('express');
+const cors = require('cors');
+const datosPreguntas = require('./datos/preguntas.json');
+
+const PREGUNTAS_POR_CUESTIONARIO = 5;
+
+// Agrupa las entradas del historial por tematica y calcula metricas acumuladas (totalTests y notaMedia)
+function calcularEstadisticasHistorial(entradasHistorial) {
+  const acumuladosPorTematica = {};
+
+  for (const entrada of entradasHistorial) {
+    const { tematicaId, tematicaNombre, nota } = entrada;
+
+    if (!acumuladosPorTematica[tematicaId]) {
+      acumuladosPorTematica[tematicaId] = {
+        tematicaId,
+        tematicaNombre,
+        totalTests: 0,
+        sumaNotas: 0
+      };
+    }
+
+    acumuladosPorTematica[tematicaId].totalTests += 1;
+    acumuladosPorTematica[tematicaId].sumaNotas += nota;
+  }
+
+  return Object.values(acumuladosPorTematica).map(
+    ({ tematicaId, tematicaNombre, totalTests, sumaNotas }) => ({
+      tematicaId,
+      tematicaNombre,
+      totalTests,
+      notaMedia: Number((sumaNotas / totalTests).toFixed(1))
+    })
+  );
+}
+
+function crearAplicacion() {
+  const aplicacion = express();
+
+  // El historial vive dentro de cada aplicacion y no a nivel de modulo para que cada instancia
+  // (por ejemplo, la de cada test) empiece con un historial vacio y no comparta estado con otras
+  const historial = [];
+  let contadorIdHistorial = 1;
+
+  function registrarEntradaHistorial({ tematicaId, tematicaNombre, aciertos, total, nota }) {
+    const entrada = {
+      id: `hist-${contadorIdHistorial++}`,
+      fecha: new Date().toISOString(),
+      tematicaId,
+      tematicaNombre,
+      aciertos,
+      total,
+      nota
+    };
+
+    historial.push(entrada);
+    return entrada;
+  }
+
+  function obtenerHistorial() {
+    return [...historial];
+  }
+
+  aplicacion.use(cors());
+  aplicacion.use(express.json());
+
+  aplicacion.get('/', (peticion, respuesta) => {
+    respuesta.send('Servidor backend funcionando correctamente');
+  });
+
+  aplicacion.get('/api/mensajes', (peticion, respuesta) => {
+    respuesta.json({
+      estado: 'conectado',
+      mensaje: 'Servidor backend conectado exitosamente con el frontend',
+      marcaTiempo: new Date().toISOString()
+    });
+  });
+
+  aplicacion.get('/api/tematicas', (peticion, respuesta) => {
+    const tematicas = datosPreguntas.categorias.map(({ id, nombre, descripcion, logo }) => ({
+      id,
+      nombre,
+      descripcion,
+      logo
+    }));
+
+    respuesta.json(tematicas);
+  });
+
+  aplicacion.get('/api/preguntas', (peticion, respuesta) => {
+    const { tematica, id } = peticion.query;
+    const categoria = datosPreguntas.categorias.find(({ id: categoriaId, nombre }) => {
+      if (id) {
+        return categoriaId === String(id);
+      }
+      return nombre.toLocaleLowerCase() === String(tematica).toLocaleLowerCase();
+    });
+
+    if (!categoria) {
+      respuesta.status(404).json({
+        error: 'La tematica solicitada no existe'
+      });
+      return;
+    }
+
+    const preguntas = [...categoria.preguntas]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, PREGUNTAS_POR_CUESTIONARIO)
+      .map((pregunta) => {
+        const preguntaPublica = { ...pregunta };
+        delete preguntaPublica.respuestaCorrecta;
+        return preguntaPublica;
+      });
+
+    respuesta.json(preguntas);
+  });
+
+  aplicacion.post('/api/corregir', (peticion, respuesta) => {
+    const { tematicaId, respuestas } = peticion.body ?? {};
+
+    if (!tematicaId || !Array.isArray(respuestas)) {
+      respuesta.status(400).json({
+        error: 'El cuerpo de la peticion es invalido'
+      });
+      return;
+    }
+
+    const categoria = datosPreguntas.categorias.find(({ id }) => id === String(tematicaId));
+
+    if (!categoria) {
+      respuesta.status(404).json({
+        error: 'La tematica solicitada no existe'
+      });
+      return;
+    }
+
+    // GET /api/preguntas sirve un subconjunto de la tematica, asi que se esperan tantas respuestas
+    // como preguntas tiene un cuestionario (o todas si la tematica tiene menos), no el total
+    const respuestasEsperadas = Math.min(PREGUNTAS_POR_CUESTIONARIO, categoria.preguntas.length);
+
+    if (respuestas.length !== respuestasEsperadas) {
+      respuesta.status(400).json({
+        error: `Se esperaban ${respuestasEsperadas} respuestas y se han recibido ${respuestas.length}`
+      });
+      return;
+    }
+
+    const idsPreguntasUnicos = new Set(respuestas.map(({ idPregunta }) => idPregunta));
+
+    if (idsPreguntasUnicos.size !== respuestas.length) {
+      respuesta.status(400).json({
+        error: 'Las respuestas contienen preguntas duplicadas'
+      });
+      return;
+    }
+
+    const tieneIndicesValidos = respuestas.every(
+      ({ indiceRespuesta }) =>
+        Number.isInteger(indiceRespuesta) && indiceRespuesta >= 0 && indiceRespuesta <= 3
+    );
+
+    if (!tieneIndicesValidos) {
+      respuesta.status(400).json({
+        error: 'Los indices de respuesta deben ser numeros enteros entre 0 y 3'
+      });
+      return;
+    }
+
+    const detalle = [];
+
+    for (const { idPregunta, indiceRespuesta } of respuestas) {
+      const pregunta = categoria.preguntas.find(({ id }) => id === idPregunta);
+
+      if (!pregunta) {
+        respuesta.status(404).json({
+          error: 'La pregunta solicitada no existe'
+        });
+        return;
+      }
+
+      detalle.push({
+        idPregunta,
+        respuestaSeleccionada: indiceRespuesta,
+        respuestaCorrecta: pregunta.respuestaCorrecta,
+        esCorrecta: indiceRespuesta === pregunta.respuestaCorrecta
+      });
+    }
+
+    const aciertos = detalle.filter(({ esCorrecta }) => esCorrecta).length;
+    const fallos = detalle.length - aciertos;
+    const nota = Number(((aciertos / detalle.length) * 10).toFixed(1));
+
+    registrarEntradaHistorial({
+      tematicaId: categoria.id,
+      tematicaNombre: categoria.nombre,
+      aciertos,
+      total: detalle.length,
+      nota
+    });
+
+    respuesta.json({ aciertos, fallos, nota, detalle });
+  });
+
+  aplicacion.get('/api/historial', (peticion, respuesta) => {
+    const listaHistorial = obtenerHistorial();
+    const estadisticas = calcularEstadisticasHistorial(listaHistorial);
+
+    respuesta.json({
+      historial: listaHistorial,
+      estadisticas
+    });
+  });
+
+  return aplicacion;
+}
+
+module.exports = {
+  crearAplicacion
+};
