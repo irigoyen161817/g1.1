@@ -7,10 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  # Lint y build comparten la preparación (checkout, Node y npm ci), así que se definen como
+  # Lint, build y test comparten la preparación (checkout, Node y npm ci), así que se definen como
   # entradas de una misma matriz. El nombre de cada job se mantiene (`lint (frontend)`,
-  # `lint (backend)`, `build (frontend)`) porque la protección de `main` exige esos checks.
-  # Al no depender unos de otros, los tres se ejecutan en paralelo.
+  # `lint (backend)`, `build (frontend)`, `test (backend)`) porque la protección de `main` exige
+  # esos checks. Al no depender unos de otros, los cuatro se ejecutan en paralelo.
   ci:
     name: ${{ matrix.tarea }} (${{ matrix.app }})
     runs-on: ubuntu-latest
@@ -24,6 +24,8 @@ jobs:
             app: backend
           - tarea: build
             app: frontend
+          - tarea: test
+            app: backend
     defaults:
       run:
         working-directory: ${{ matrix.app }}
@@ -41,6 +43,8 @@ jobs:
         run: npm run format:check
       - if: matrix.tarea == 'build'
         run: npm run build
+      - if: matrix.tarea == 'test'
+        run: npm test
       - if: matrix.tarea == 'build'
         uses: actions/upload-artifact@v4
         with:
