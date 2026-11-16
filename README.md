@@ -54,10 +54,24 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 | Raíz       | `npm run lint`         | Ejecuta ESLint en frontend y backend.                |
 | Raíz       | `npm run format`       | Aplica Prettier a frontend y backend.                |
 | Raíz       | `npm run format:check` | Comprueba el formato sin modificar archivos.         |
+| Raíz       | `npm test`             | Ejecuta los tests del backend.                       |
 | `frontend` | `npm run build`        | Genera la versión de producción en `frontend/dist/`. |
 | `frontend` | `npm run preview`      | Sirve localmente la versión generada con `build`.    |
 
-`backend` y `frontend` también tienen sus propios `lint`, `format` y `format:check`.
+`backend` y `frontend` también tienen sus propios `lint`, `format` y `format:check`, y `backend` tiene su propio `npm test`.
+
+## Tests
+
+Los tests de la API están en `backend/tests/` y usan el runner nativo de Node.js (`node:test`) con `supertest`, que hace las peticiones HTTP a la aplicación sin levantar el servidor en un puerto. Se ejecutan desde la raíz o desde `backend` con:
+
+```bash
+npm test
+```
+
+Cada fichero `*.test.js` cubre un endpoint (`tematicas`, `preguntas`, `corregir` e `historial`) con sus casos `200`, `400` y `404`. `tests/utilidades.js` reúne las funciones compartidas:
+
+- `crearAplicacionPrueba()`: crea una aplicación nueva, con el historial vacío, para que ningún test dependa del estado de otro.
+- `respuestasDeTematica(tematicaId, { correctas })`: genera un cuerpo válido para `POST /api/corregir` con tantas respuestas acertadas como indique `correctas` y el resto falladas.
 
 ## Calidad y formato del código
 
@@ -65,7 +79,7 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo tres jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, y `build (frontend)` compila el frontend. Una pull request no puede fusionarse hasta que el workflow termine en verde.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. Una pull request no puede fusionarse hasta que el workflow termine en verde.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
@@ -86,7 +100,9 @@ flowchart LR
 ```text
 g1.1/
 ├── backend/
-│   ├── index.js                servidor Express y endpoints de la API
+│   ├── app.js                  aplicación Express y endpoints de la API
+│   ├── index.js                arranque del servidor
+│   ├── tests/                  tests de la API y utilidades compartidas
 │   └── datos/
 │       └── preguntas.json      temáticas y preguntas
 ├── frontend/
@@ -109,7 +125,7 @@ g1.1/
 
 ### Backend
 
-El punto de entrada es `backend/index.js`. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
+El punto de entrada es `backend/index.js`, que solo arranca el servidor en `PUERTO`. La aplicación se define en `backend/app.js`, que exporta `crearAplicacion()`: crea la aplicación Express con sus rutas y su propio historial, sin hacer `listen`. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
 
 | Método | Ruta             | Parámetros                                                           |
 | :----- | :--------------- | :------------------------------------------------------------------- |
@@ -261,6 +277,7 @@ flowchart LR
 | Backend    | `express`                                                   | Servidor HTTP y API.                          |
 | Backend    | `cors`                                                      | Permite peticiones desde otro origen.         |
 | Backend    | `nodemon` (desarrollo)                                      | Reinicio automático con `npm run dev`.        |
+| Backend    | `supertest` (desarrollo)                                    | Peticiones HTTP a la API en los tests.        |
 | Frontend   | `react`, `react-dom`                                        | Interfaz de usuario.                          |
 | Frontend   | `vite` (desarrollo)                                         | Servidor de desarrollo, proxy `/api` y build. |
 | Frontend   | `recharts`                                                  | Gráficos del historial.                       |
@@ -271,7 +288,8 @@ flowchart LR
 ### Decisiones técnicas
 
 - **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
-- **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/index.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
+- **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/app.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
+- **Aplicación separada del arranque (`app.js` e `index.js`):** `crearAplicacion()` monta las rutas sin hacer `listen`, así los tests usan la aplicación con `supertest` sin ocupar un puerto. El historial se crea dentro de cada aplicación, de modo que cada test parte de un historial vacío; el servidor real crea una sola aplicación, así que su comportamiento no cambia.
 - **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.
 - **Navegación con estado, sin router:** solo hay dos vistas, así que un estado en `App.jsx` es suficiente.
 - **Máximo de 10 partidas recientes:** el historial no está paginado y crece con cada cuestionario, así que el panel limita la lista (`MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
