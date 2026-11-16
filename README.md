@@ -95,7 +95,7 @@ g1.1/
 │   │   └── tematicas/          logos de las temáticas
 │   └── src/
 │       ├── main.jsx            punto de entrada (importa las fuentes y index.css)
-│       ├── App.jsx             cambia entre la selección de temáticas y el historial
+│       ├── App.jsx             rutas principales de la aplicación (react-router-dom)
 │       ├── components/         un .jsx y un .css por componente
 │       ├── utils.js            funciones de formato compartidas
 │       ├── index.css           reset, variables globales y botones compartidos
@@ -234,24 +234,33 @@ Sirve para comprobar que el backend responde; el frontend no lo usa.
 
 ### Frontend
 
-La aplicación tiene cuatro pantallas. Así se pasa de una a otra:
+La aplicación cuenta con un sistema de rutas gestionado por `react-router-dom`:
+
+| Ruta                         | Pantalla              | Componente principal  | Qué muestra                                                   |
+| :--------------------------- | :-------------------- | :-------------------- | :------------------------------------------------------------ |
+| `/`                          | Temáticas             | `SeleccionTematica`   | Una tarjeta por temática y el botón para ver el historial     |
+| `/cuestionario/:tematicaId`  | Cuestionario          | `PaginaCuestionario`  | Carga las preguntas y muestra `PantallaPregunta` o error 404  |
+| `/historial`                 | Historial             | `PanelHistorial`      | Resumen de partidas, dos gráficos y las últimas partidas      |
+| `*`                          | Redirección           | `Navigate to="/"`     | Cualquier otra ruta redirige a la selección de temáticas      |
+
+Así se pasa de una a otra:
 
 ```mermaid
 flowchart LR
-  T[Temáticas] -->|elige temática| C[Cuestionario]
-  C -->|responde la última pregunta| R[Resumen]
+  T["/ (Temáticas)"] -->|elige temática| C["/cuestionario/:tematicaId"]
+  C -->|responde la última pregunta| R["Resumen (en cuestionario)"]
   R -->|volver| T
-  T <-->|ver historial / volver| H[Historial]
+  T <-->|ver historial / volver| H["/historial"]
 ```
 
 | Pantalla     | Componente principal  | Qué muestra                                                   | Componentes hijos                                                                      |
 | :----------- | :-------------------- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
 | Temáticas    | `SeleccionTematica`   | Una tarjeta por temática y el botón para ver el historial     | `Encabezado`, `TarjetaTematica`, `AccesoHistorial`                                     |
-| Cuestionario | `PantallaPregunta`    | Una pregunta cada vez con su progreso                         | `ProgresoCuestionario`, `TarjetaPregunta` (con `OpcionRespuesta`), `ControlesPregunta` |
+| Cuestionario | `PaginaCuestionario`  | Carga y muestra el cuestionario o 404                         | `Encabezado`, `PantallaPregunta` (con `ProgresoCuestionario`, `TarjetaPregunta`, `ControlesPregunta`, `ResumenCuestionario`) |
 | Resumen      | `ResumenCuestionario` | La nota, los aciertos y fallos, y el detalle de cada pregunta | `DetallePregunta`                                                                      |
 | Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos y las últimas partidas      | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
 
-- **Navegación:** no hay librería de rutas; `App.jsx` cambia entre temáticas e historial con un estado, y el cuestionario y el resumen se muestran dentro de la pantalla de temáticas.
+- **Navegación:** gestionada mediante `react-router-dom` v7 con `BrowserRouter`, `Routes` y `Route` en `App.jsx`, permitiendo recargar o compartir la URL y usar el botón "atrás" del navegador. `SeleccionTematica` y `PanelHistorial` navegan utilizando `useNavigate`. El resumen sigue siendo un estado dentro del cuestionario.
 - **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha` y `obtenerClaseNota` (color de la nota), para que una misma nota se vea igual en el resumen, el historial y los gráficos.
 
 ### Dependencias
@@ -262,6 +271,7 @@ flowchart LR
 | Backend    | `cors`                                                      | Permite peticiones desde otro origen.         |
 | Backend    | `nodemon` (desarrollo)                                      | Reinicio automático con `npm run dev`.        |
 | Frontend   | `react`, `react-dom`                                        | Interfaz de usuario.                          |
+| Frontend   | `react-router-dom`                                          | Sistema de enrutamiento y navegación cliente. |
 | Frontend   | `vite` (desarrollo)                                         | Servidor de desarrollo, proxy `/api` y build. |
 | Frontend   | `recharts`                                                  | Gráficos del historial.                       |
 | Frontend   | `@fontsource/hanken-grotesk`, `@fontsource/space-grotesk`   | Fuentes servidas desde el propio proyecto.    |
@@ -273,7 +283,7 @@ flowchart LR
 - **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
 - **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/index.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
 - **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.
-- **Navegación con estado, sin router:** solo hay dos vistas, así que un estado en `App.jsx` es suficiente.
+- **Enrutamiento declarativo con `react-router-dom`:** cada pantalla dispone de su propia URL (`/`, `/cuestionario/:tematicaId`, `/historial`), lo que permite recargar la página directamente y utilizar el historial del navegador ("atrás" / "adelante").
 - **Máximo de 10 partidas recientes:** el historial no está paginado y crece con cada cuestionario, así que el panel limita la lista (`MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
 - **Un CSS por componente:** cada componente lleva sus estilos y media queries, y los colores repetidos se centralizan en variables globales para no duplicar valores.
 - **Variables de "Cognitive Clarity" con ámbito en `.vista-diseno`:** así el nuevo diseño se aplica solo a temáticas e historial sin cambiar el resto de pantallas.

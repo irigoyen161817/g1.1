@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Encabezado from './Encabezado'
 import EstadisticasCategorias from './EstadisticasCategorias'
 import EvolucionHistorial from './EvolucionHistorial'
@@ -9,7 +10,8 @@ import './PanelHistorial.css'
 // el panel solo pinta las 10 partidas más recientes para que la lista no crezca sin límite
 const MAXIMO_PARTIDAS_RECIENTES = 10
 
-function PanelHistorial({ alVolver }) {
+function PanelHistorial() {
+  const navigate = useNavigate()
   const [historial, setHistorial] = useState([])
   const [estadisticas, setEstadisticas] = useState([])
   const [estaCargando, setEstaCargando] = useState(true)
@@ -62,6 +64,10 @@ function PanelHistorial({ alVolver }) {
     setIntentoCarga((intento) => intento + 1)
   }
 
+  const volverAInicio = () => {
+    navigate('/')
+  }
+
   const hayDatos = !estaCargando && !mensajeError && historial.length > 0
   const estaVacio = !estaCargando && !mensajeError && historial.length === 0
 
@@ -77,7 +83,7 @@ function PanelHistorial({ alVolver }) {
       <Encabezado />
       <main className="panel-historial vista-diseno">
         <div className="panel-historial-contenido">
-          <button className="boton-volver-tematicas" type="button" onClick={alVolver}>
+          <button className="boton-volver-tematicas" type="button" onClick={volverAInicio}>
             <svg
               width="16"
               height="16"
@@ -119,7 +125,7 @@ function PanelHistorial({ alVolver }) {
             <div className="historial-vacio" role="status">
               <h2>Aún no tienes partidas</h2>
               <p>Completa tu primer cuestionario y aquí aparecerá tu historial de resultados.</p>
-              <button className="boton-historial-principal" type="button" onClick={alVolver}>
+              <button className="boton-historial-principal" type="button" onClick={volverAInicio}>
                 Elegir una temática
               </button>
             </div>
