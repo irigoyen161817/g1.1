@@ -68,10 +68,22 @@ Los tests de la API están en `backend/tests/` y usan el runner nativo de Node.j
 npm test
 ```
 
-Cada fichero `*.test.js` cubre un endpoint (`tematicas`, `preguntas`, `corregir` e `historial`) con sus casos `200`, `400` y `404`. `tests/utilidades.js` reúne las funciones compartidas:
+Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado que puede devolver:
+
+| Fichero             | Endpoint              | Casos                 |
+| :------------------ | :-------------------- | :-------------------- |
+| `tematicas.test.js` | `GET /api/tematicas`  | `200`                 |
+| `preguntas.test.js` | `GET /api/preguntas`  | `200` y `404`         |
+| `corregir.test.js`  | `POST /api/corregir`  | `200`, `400` y `404`  |
+| `historial.test.js` | `GET /api/historial`  | `200`                 |
+
+`tests/utilidades.js` reúne las funciones compartidas:
 
 - `crearAplicacionPrueba()`: crea una aplicación nueva, con el historial vacío, para que ningún test dependa del estado de otro.
-- `respuestasDeTematica(tematicaId, { correctas })`: genera un cuerpo válido para `POST /api/corregir` con tantas respuestas acertadas como indique `correctas` y el resto falladas.
+- `respuestasDeTematica(tematicaId, { correctas })`: genera un cuerpo válido para `POST /api/corregir` con tantas respuestas acertadas como indique `correctas` y el resto falladas. Lanza un error si la temática no existe en `datos/preguntas.json`.
+- `enviarCorreccion(aplicacion, cuerpo)`: envía el cuerpo a `POST /api/corregir` de esa aplicación.
+
+Los tests toman el número de preguntas por cuestionario y de opciones por pregunta de las constantes que exporta `app.js` (`PREGUNTAS_POR_CUESTIONARIO` y `OPCIONES_POR_PREGUNTA`), así no se desincronizan si cambian.
 
 ## Calidad y formato del código
 
@@ -79,7 +91,7 @@ Cada fichero `*.test.js` cubre un endpoint (`tematicas`, `preguntas`, `corregir`
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. Una pull request no puede fusionarse hasta que el workflow termine en verde.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
@@ -125,7 +137,7 @@ g1.1/
 
 ### Backend
 
-El punto de entrada es `backend/index.js`, que solo arranca el servidor en `PUERTO`. La aplicación se define en `backend/app.js`, que exporta `crearAplicacion()`: crea la aplicación Express con sus rutas y su propio historial, sin hacer `listen`. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
+El punto de entrada es `backend/index.js`, que solo arranca el servidor en `PUERTO`. La aplicación se define en `backend/app.js`, que exporta `crearAplicacion()`: crea la aplicación Express con sus rutas y su propio historial, sin hacer `listen`. También exporta `PREGUNTAS_POR_CUESTIONARIO` (5) y `OPCIONES_POR_PREGUNTA` (4), que usan las validaciones y los tests. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
 
 | Método | Ruta             | Parámetros                                                           |
 | :----- | :--------------- | :------------------------------------------------------------------- |
