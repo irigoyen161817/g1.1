@@ -1,7 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { crearAplicacionPrueba, respuestasDeTematica } = require('./utilidades');
+const { crearAplicacionPrueba, respuestasDeTematica, enviarCorreccion } = require('./utilidades');
+
+const TEMATICA_ID = 'cat-filosofia';
 
 test('GET /api/historial de una aplicacion nueva llega vacio', async () => {
   const respuesta = await request(crearAplicacionPrueba()).get('/api/historial');
@@ -14,13 +16,10 @@ test('GET /api/historial registra las partidas y calcula las estadisticas', asyn
   const aplicacion = crearAplicacionPrueba();
 
   for (const correctas of [5, 2]) {
-    await request(aplicacion)
-      .post('/api/corregir')
-      .send({
-        tematicaId: 'cat-filosofia',
-        respuestas: respuestasDeTematica('cat-filosofia', { correctas })
-      })
-      .expect(200);
+    await enviarCorreccion(aplicacion, {
+      tematicaId: TEMATICA_ID,
+      respuestas: respuestasDeTematica(TEMATICA_ID, { correctas })
+    }).expect(200);
   }
 
   const respuesta = await request(aplicacion).get('/api/historial');
@@ -39,7 +38,7 @@ test('GET /api/historial registra las partidas y calcula las estadisticas', asyn
     ]
   );
   assert.deepEqual(respuesta.body.estadisticas, [
-    { tematicaId: 'cat-filosofia', tematicaNombre: 'Filosofía', totalTests: 2, notaMedia: 7 }
+    { tematicaId: TEMATICA_ID, tematicaNombre: 'Filosofía', totalTests: 2, notaMedia: 7 }
   ]);
 });
 
@@ -50,7 +49,7 @@ test('GET /api/historial no comparte partidas entre aplicaciones', async () => {
   };
 
   for (const aplicacion of [crearAplicacionPrueba(), crearAplicacionPrueba()]) {
-    await request(aplicacion).post('/api/corregir').send(cuerpo).expect(200);
+    await enviarCorreccion(aplicacion, cuerpo).expect(200);
     const respuesta = await request(aplicacion).get('/api/historial');
 
     assert.equal(respuesta.body.historial.length, 1);
