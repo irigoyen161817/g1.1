@@ -3,6 +3,7 @@ const cors = require('cors');
 const datosPreguntas = require('./datos/preguntas.json');
 
 const PREGUNTAS_POR_CUESTIONARIO = 5;
+const OPCIONES_POR_PREGUNTA = 4;
 
 // Agrupa las entradas del historial por tematica y calcula metricas acumuladas (totalTests y notaMedia)
 function calcularEstadisticasHistorial(entradasHistorial) {
@@ -156,12 +157,14 @@ function crearAplicacion() {
 
     const tieneIndicesValidos = respuestas.every(
       ({ indiceRespuesta }) =>
-        Number.isInteger(indiceRespuesta) && indiceRespuesta >= 0 && indiceRespuesta <= 3
+        Number.isInteger(indiceRespuesta) &&
+        indiceRespuesta >= 0 &&
+        indiceRespuesta < OPCIONES_POR_PREGUNTA
     );
 
     if (!tieneIndicesValidos) {
       respuesta.status(400).json({
-        error: 'Los indices de respuesta deben ser numeros enteros entre 0 y 3'
+        error: `Los indices de respuesta deben ser numeros enteros entre 0 y ${OPCIONES_POR_PREGUNTA - 1}`
       });
       return;
     }
@@ -215,5 +218,7 @@ function crearAplicacion() {
 }
 
 module.exports = {
-  crearAplicacion
+  crearAplicacion,
+  PREGUNTAS_POR_CUESTIONARIO,
+  OPCIONES_POR_PREGUNTA
 };
