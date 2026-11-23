@@ -7,9 +7,10 @@
 
 .cabecera-progreso {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  gap: 8px;
 }
 
 .cabecera-progreso h1 {
@@ -41,7 +42,7 @@
 
 .indicadores-preguntas {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 24px 0 0;
   padding: 0;
@@ -84,20 +85,20 @@
   background: var(--color-primario);
 }
 
-@media (max-width: 900px) {
+@media (min-width: 640px) {
+  .cabecera-progreso {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+
   .indicadores-preguntas {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
-  .cabecera-progreso {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
+@media (min-width: 900px) {
   .indicadores-preguntas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }

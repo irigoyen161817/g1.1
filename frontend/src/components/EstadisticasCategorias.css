@@ -33,7 +33,7 @@
   line-height: 20px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .estadisticas-categorias,
   .etiqueta-categoria {
     font-size: 14px;
