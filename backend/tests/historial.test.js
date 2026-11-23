@@ -1,19 +1,20 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { crearAplicacionPrueba, respuestasDeTematica, enviarCorreccion } = require('./utilidades');
+const { crearAplicacion } = require('../app');
+const { respuestasDeTematica, enviarCorreccion } = require('./utilidades');
 
 const TEMATICA_ID = 'cat-filosofia';
 
 test('GET /api/historial de una aplicacion nueva llega vacio', async () => {
-  const respuesta = await request(crearAplicacionPrueba()).get('/api/historial');
+  const respuesta = await request(crearAplicacion()).get('/api/historial');
 
   assert.equal(respuesta.status, 200);
   assert.deepEqual(respuesta.body, { historial: [], estadisticas: [] });
 });
 
 test('GET /api/historial registra las partidas y calcula las estadisticas', async () => {
-  const aplicacion = crearAplicacionPrueba();
+  const aplicacion = crearAplicacion();
 
   for (const correctas of [5, 2]) {
     await enviarCorreccion(aplicacion, {
@@ -48,7 +49,7 @@ test('GET /api/historial no comparte partidas entre aplicaciones', async () => {
     respuestas: respuestasDeTematica('cat-lengua', { correctas: 3 })
   };
 
-  for (const aplicacion of [crearAplicacionPrueba(), crearAplicacionPrueba()]) {
+  for (const aplicacion of [crearAplicacion(), crearAplicacion()]) {
     await enviarCorreccion(aplicacion, cuerpo).expect(200);
     const respuesta = await request(aplicacion).get('/api/historial');
 

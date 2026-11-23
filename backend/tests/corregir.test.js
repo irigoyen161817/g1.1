@@ -1,11 +1,12 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { crearAplicacionPrueba, respuestasDeTematica, enviarCorreccion } = require('./utilidades');
+const { crearAplicacion } = require('../app');
+const { respuestasDeTematica, enviarCorreccion } = require('./utilidades');
 
 const TEMATICA_ID = 'cat-filosofia';
 
 function corregir(cuerpo) {
-  return enviarCorreccion(crearAplicacionPrueba(), cuerpo);
+  return enviarCorreccion(crearAplicacion(), cuerpo);
 }
 
 test('POST /api/corregir calcula aciertos, fallos y nota', async () => {

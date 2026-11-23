@@ -1,11 +1,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const { crearAplicacionPrueba } = require('./utilidades');
+const { crearAplicacion } = require('../app');
 const datosPreguntas = require('../datos/preguntas.json');
 
 test('GET /api/tematicas devuelve todas las tematicas sin sus preguntas', async () => {
-  const respuesta = await request(crearAplicacionPrueba()).get('/api/tematicas');
+  const respuesta = await request(crearAplicacion()).get('/api/tematicas');
 
   assert.equal(respuesta.status, 200);
   assert.equal(respuesta.body.length, datosPreguntas.categorias.length);

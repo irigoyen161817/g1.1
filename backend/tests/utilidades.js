@@ -1,10 +1,6 @@
 const request = require('supertest');
-const { crearAplicacion, PREGUNTAS_POR_CUESTIONARIO, OPCIONES_POR_PREGUNTA } = require('../app');
+const { PREGUNTAS_POR_CUESTIONARIO, OPCIONES_POR_PREGUNTA } = require('../app');
 const datosPreguntas = require('../datos/preguntas.json');
-
-function crearAplicacionPrueba() {
-  return crearAplicacion();
-}
 
 // Construye un cuerpo valido para POST /api/corregir: las primeras `correctas` respuestas aciertan
 // y el resto elige la opcion siguiente a la correcta (modulo OPCIONES_POR_PREGUNTA), que siempre es un fallo
@@ -29,7 +25,6 @@ function enviarCorreccion(aplicacion, cuerpo) {
 }
 
 module.exports = {
-  crearAplicacionPrueba,
   respuestasDeTematica,
   enviarCorreccion
 };

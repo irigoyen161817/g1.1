@@ -77,9 +77,8 @@ Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado
 | `corregir.test.js`  | `POST /api/corregir`  | `200`, `400` y `404`  |
 | `historial.test.js` | `GET /api/historial`  | `200`                 |
 
-`tests/utilidades.js` reúne las funciones compartidas:
+Cada test crea su propia aplicación con `crearAplicacion()`, con el historial vacío, para no depender del estado de otro test. `tests/utilidades.js` reúne las funciones compartidas:
 
-- `crearAplicacionPrueba()`: crea una aplicación nueva, con el historial vacío, para que ningún test dependa del estado de otro.
 - `respuestasDeTematica(tematicaId, { correctas })`: genera un cuerpo válido para `POST /api/corregir` con tantas respuestas acertadas como indique `correctas` y el resto falladas. Lanza un error si la temática no existe en `datos/preguntas.json`.
 - `enviarCorreccion(aplicacion, cuerpo)`: envía el cuerpo a `POST /api/corregir` de esa aplicación.
 
