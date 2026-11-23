@@ -119,7 +119,11 @@ function crearAplicacion() {
   aplicacion.post('/api/corregir', (peticion, respuesta) => {
     const { tematicaId, respuestas } = peticion.body ?? {};
 
-    if (!tematicaId || !Array.isArray(respuestas)) {
+    if (
+      !tematicaId ||
+      !Array.isArray(respuestas) ||
+      !respuestas.every((elemento) => elemento && typeof elemento === 'object')
+    ) {
       respuesta.status(400).json({
         error: 'El cuerpo de la peticion es invalido'
       });

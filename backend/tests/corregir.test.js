@@ -25,9 +25,14 @@ test('POST /api/corregir calcula aciertos, fallos y nota', async () => {
 test('POST /api/corregir responde 400 si el cuerpo es invalido', async () => {
   const sinTematica = await corregir({ respuestas: [] });
   const sinRespuestas = await corregir({ tematicaId: TEMATICA_ID });
+  const respuestaNula = await corregir({
+    tematicaId: TEMATICA_ID,
+    respuestas: [null, ...respuestasDeTematica(TEMATICA_ID).slice(1)]
+  });
 
   assert.equal(sinTematica.status, 400);
   assert.equal(sinRespuestas.status, 400);
+  assert.equal(respuestaNula.status, 400);
   assert.equal(sinTematica.body.error, 'El cuerpo de la peticion es invalido');
 });
 
