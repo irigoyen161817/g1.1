@@ -1,12 +1,13 @@
 .controles-pregunta {
   display: flex;
+  flex-direction: column-reverse;
   justify-content: space-between;
   gap: 16px;
   margin-top: 24px;
 }
 
-@media (max-width: 640px) {
+@media (min-width: 640px) {
   .controles-pregunta {
-    flex-direction: column-reverse;
+    flex-direction: row;
   }
 }

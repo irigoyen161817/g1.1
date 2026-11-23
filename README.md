@@ -290,6 +290,7 @@ flowchart LR
 - **Variables de "Cognitive Clarity" con ámbito en `.vista-diseno`:** así el nuevo diseño se aplica solo a temáticas e historial sin cambiar el resto de pantallas.
 - **Fuentes locales con `@fontsource`:** evitan peticiones a servicios externos.
 - **Etiquetas de los gráficos en varias líneas:** el texto SVG no hace saltos de línea, así que los nombres largos de las temáticas se dividen para que no se solapen en móvil.
+- **Diseño mobile first con puntos de ruptura de 640 y 900 px:** los estilos base de los componentes se definen para móvil sin `@media (max-width)`. Las adaptaciones para pantallas más anchas se introducen progresivamente con `@media (min-width: 640px)` y `@media (min-width: 900px)`, garantizando que no haya desplazamiento horizontal a partir de 320–360 px y que los botones mantengan al menos 44 px de altura en móvil.
 - **Arranque único sin dependencias (`scripts/iniciar.js`):** funciona en un clon recién hecho antes de instalar nada. Al terminar detiene ambos servidores (en Windows con `taskkill /T` y en macOS/Linux con grupos de procesos) para no dejar puertos ocupados.
 
 ## Flujo de contribución

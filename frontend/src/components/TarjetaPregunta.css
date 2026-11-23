@@ -1,6 +1,6 @@
 .tarjeta-pregunta {
   margin-top: 32px;
-  padding: 40px;
+  padding: 24px 20px;
   border: 1px solid var(--color-linea-suave);
   border-radius: 14px;
   background: var(--color-superficie);
@@ -29,8 +29,8 @@
   margin-top: 36px;
 }
 
-@media (max-width: 640px) {
+@media (min-width: 640px) {
   .tarjeta-pregunta {
-    padding: 24px 20px;
+    padding: 40px;
   }
 }

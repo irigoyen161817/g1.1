@@ -10,7 +10,7 @@
   line-height: 20px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .evolucion-historial {
     font-size: 14px;
   }
