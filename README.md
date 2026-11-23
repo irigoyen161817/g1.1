@@ -252,6 +252,7 @@ flowchart LR
   C -->|responde la última pregunta| R["Resumen (en cuestionario)"]
   R -->|volver| T
   T <-->|ver historial / volver| H["/historial"]
+  H -->|repetir suspendido| C
 ```
 
 | Pantalla     | Componente principal  | Qué muestra                                                   | Componentes hijos                                                                      |
@@ -259,10 +260,10 @@ flowchart LR
 | Temáticas    | `SeleccionTematica`   | Una tarjeta por temática y el botón para ver el historial     | `Encabezado`, `TarjetaTematica`, `AccesoHistorial`                                     |
 | Cuestionario | `PaginaCuestionario`  | Carga y muestra el cuestionario o 404                         | `Encabezado`, `PantallaPregunta` (con `ProgresoCuestionario`, `TarjetaPregunta`, `ControlesPregunta`, `ResumenCuestionario`) |
 | Resumen      | `ResumenCuestionario` | La nota, los aciertos y fallos, y el detalle de cada pregunta | `DetallePregunta`                                                                      |
-| Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos y las últimas partidas      | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
+| Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos, las últimas partidas y opción de repetir suspendidos | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
 
 - **Navegación:** gestionada mediante `react-router-dom` v7 con `BrowserRouter`, `Routes` y `Route` en `App.jsx`, permitiendo recargar o compartir la URL y usar el botón "atrás" del navegador. `SeleccionTematica` y `PanelHistorial` navegan utilizando `useNavigate`. El resumen sigue siendo un estado dentro del cuestionario.
-- **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha` y `obtenerClaseNota` (color de la nota), para que una misma nota se vea igual en el resumen, el historial y los gráficos.
+- **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha`, `obtenerClaseNota` (color de la nota) y `esNotaAprobada` (con umbral fijado en `NOTA_MINIMA_APROBADO = 5`), para que los criterios de aprobado y formato de nota sean consistentes en toda la aplicación.
 
 ### Dependencias
 
@@ -291,6 +292,7 @@ flowchart LR
 - **Fuentes locales con `@fontsource`:** evitan peticiones a servicios externos.
 - **Etiquetas de los gráficos en varias líneas:** el texto SVG no hace saltos de línea, así que los nombres largos de las temáticas se dividen para que no se solapen en móvil.
 - **Arranque único sin dependencias (`scripts/iniciar.js`):** funciona en un clon recién hecho antes de instalar nada. Al terminar detiene ambos servidores (en Windows con `taskkill /T` y en macOS/Linux con grupos de procesos) para no dejar puertos ocupados.
+- **Repetición de exámenes suspendidos desde el historial:** se define `NOTA_MINIMA_APROBADO = 5` en `src/utils.js` para delimitar las notas aprobadas. En la lista de partidas recientes de `PanelHistorial`, cada partida suspendida muestra un botón "Repetir" con `<Link>` accesible mediante `aria-label` que navega directamente a `/cuestionario/:tematicaId`, facilitando al estudiante volver a realizar el cuestionario de esa temática sin pasar por el selector inicial.
 
 ## Flujo de contribución
 
