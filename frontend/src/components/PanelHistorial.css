@@ -295,7 +295,8 @@
 .partida-resultado {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px 16px;
 }
 
 .partida-aciertos {
@@ -308,6 +309,40 @@
   font-size: 20px;
   line-height: 28px;
   font-weight: 700;
+}
+
+.boton-repetir-examen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-acento);
+  border-radius: 8px;
+  color: var(--color-acento);
+  background: var(--color-acento-suave);
+  font-family: var(--fuente-cuerpo);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.boton-repetir-examen:hover {
+  color: #ffffff;
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+}
+
+.boton-repetir-examen:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(41, 82, 227, 0.25);
 }
 
 @media (min-width: 640px) {
@@ -335,6 +370,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
+  }
+
+  .partida-resultado {
+    flex-wrap: nowrap;
+    gap: 20px;
   }
 }
 
