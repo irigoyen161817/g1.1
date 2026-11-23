@@ -4,7 +4,7 @@ Proyecto de desarrollo de la asignatura GPI1. EduQuest es una aplicación de cue
 
 ## Requisitos
 
-- Node.js 20 o superior.
+- Node.js 22 o superior.
 - npm.
 
 ## Inicio rápido
@@ -40,10 +40,11 @@ npm run dev
 
 ## Configuración
 
-| Elemento     | Dónde                     | Valor por defecto       | Descripción                                                                                                                            |
-| :----------- | :------------------------ | :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUERTO`     | Variable de entorno       | `3000`                  | Puerto en el que escucha el backend.                                                                                                   |
-| Proxy `/api` | `frontend/vite.config.js` | `http://localhost:3000` | En desarrollo, Vite reenvía al backend todas las peticiones que empiezan por `/api`, así que el frontend usa rutas relativas sin CORS. |
+| Elemento          | Dónde                     | Valor por defecto           | Descripción                                                                                                                            |
+| :---------------- | :------------------------ | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUERTO`          | Variable de entorno       | `3000`                      | Puerto en el que escucha el backend.                                                                                                   |
+| `RUTA_BASE_DATOS` | Variable de entorno       | `backend/datos/eduquest.db` | Ruta al fichero de base de datos SQLite local donde se persisten los datos.                                                            |
+| Proxy `/api`      | `frontend/vite.config.js` | `http://localhost:3000`     | En desarrollo, Vite reenvía al backend todas las peticiones que empiezan por `/api`, así que el frontend usa rutas relativas sin CORS. |
 
 Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.config.js`.
 
@@ -70,12 +71,13 @@ npm test
 
 Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado que puede devolver:
 
-| Fichero             | Endpoint              | Casos                 |
-| :------------------ | :-------------------- | :-------------------- |
-| `tematicas.test.js` | `GET /api/tematicas`  | `200`                 |
-| `preguntas.test.js` | `GET /api/preguntas`  | `200` y `404`         |
-| `corregir.test.js`  | `POST /api/corregir`  | `200`, `400` y `404`  |
-| `historial.test.js` | `GET /api/historial`  | `200`                 |
+| Fichero                 | Endpoint o módulo            | Casos                                                                  |
+| :---------------------- | :--------------------------- | :--------------------------------------------------------------------- |
+| `tematicas.test.js`     | `GET /api/tematicas`         | `200`                                                                  |
+| `preguntas.test.js`     | `GET /api/preguntas`         | `200` y `404`                                                          |
+| `corregir.test.js`      | `POST /api/corregir`         | `200`, `400` y `404`                                                   |
+| `historial.test.js`     | `GET /api/historial`         | `200`                                                                  |
+| `persistencia.test.js`  | Persistencia y SQLite        | Migraciones (`user_version`), carga inicial sin duplicados y reinicio. |
 
 Cada test crea su propia aplicación con `crearAplicacion()`, con el historial vacío, para no depender del estado de otro test. `tests/utilidades.js` reúne las funciones compartidas:
 
@@ -90,7 +92,7 @@ Los tests toman el número de preguntas por cuestionario y de opciones por pregu
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 22): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
@@ -102,8 +104,9 @@ EduQuest está dividido en dos aplicaciones independientes que se ejecutan como 
 flowchart LR
   Navegador["Navegador"] --> Vite["Frontend<br/>React + Vite :5173"]
   Vite -- "proxy /api" --> Express["Backend<br/>Express :3000"]
-  Express --> Datos[("datos/preguntas.json")]
-  Express --> Historial[("Historial en memoria")]
+  Express --> Repositorios["Repositorios"]
+  Repositorios --> SQLite[("SQLite<br/>eduquest.db")]
+  SQLite -. "carga inicial si vacía" .-> Datos[("datos/preguntas.json")]
 ```
 
 ### Estructura de carpetas
@@ -113,9 +116,17 @@ g1.1/
 ├── backend/
 │   ├── app.js                  aplicación Express y endpoints de la API
 │   ├── index.js                arranque del servidor
-│   ├── tests/                  tests de la API y utilidades compartidas
+│   ├── baseDatos/              conexión SQLite, migraciones, carga inicial y repositorios
+│   │   ├── conexion.js         inicialización de la base de datos (claves foráneas y WAL)
+│   │   ├── migraciones.js      lista de migraciones versionadas y runner
+│   │   ├── cargaInicial.js     población inicial desde preguntas.json si la base está vacía
+│   │   ├── repositorioTematicas.js  consultas de temáticas
+│   │   ├── repositorioPreguntas.js  consultas de preguntas y opciones
+│   │   └── repositorioHistorial.js  persistencia y lectura de partidas
+│   ├── tests/                  tests de la API, persistencia y utilidades compartidas
 │   └── datos/
-│       └── preguntas.json      temáticas y preguntas
+│       ├── preguntas.json      datos semilla para la carga inicial
+│       └── eduquest.db         base de datos SQLite local (ignorado en git)
 ├── frontend/
 │   ├── vite.config.js          configuración de Vite y proxy /api
 │   ├── public/
@@ -136,7 +147,15 @@ g1.1/
 
 ### Backend
 
-El punto de entrada es `backend/index.js`, que solo arranca el servidor en `PUERTO`. La aplicación se define en `backend/app.js`, que exporta `crearAplicacion()`: crea la aplicación Express con sus rutas y su propio historial, sin hacer `listen`. También exporta `PREGUNTAS_POR_CUESTIONARIO` (5) y `OPCIONES_POR_PREGUNTA` (4), que usan las validaciones y los tests. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
+El punto de entrada es `backend/index.js`, que arranca el servidor en `PUERTO` sobre la base de datos configurada en `RUTA_BASE_DATOS` (por defecto `backend/datos/eduquest.db`). La aplicación Express se define en `backend/app.js` mediante `crearAplicacion({ rutaBaseDatos })`, permitiendo que los tests ejecuten una base en memoria (`:memory:`) totalmente aislada sin ocupar puertos ni tocar el archivo local.
+
+Los datos se gestionan a través de repositorios desacoplados (`repositorioTematicas`, `repositorioPreguntas`, `repositorioHistorial`) que interactúan con las siguientes tablas SQLite:
+
+- `tematicas`: almacena el identificador (`id`), `nombre`, `descripcion` y la ruta del `logo`.
+- `preguntas`: almacena cada pregunta con su clave primaria (`id`), clave foránea `id_tematica` referenciando a `tematicas(id)`, el `enunciado`, las `opciones` (array serializado en JSON) y el índice de `respuesta_correcta`.
+- `historial`: almacena cada partida completada con su clave primaria (`id`), `fecha`, clave foránea `id_tematica`, `nombre_tematica`, `aciertos`, `total` y la `nota` obtenida.
+
+También exporta `PREGUNTAS_POR_CUESTIONARIO` (5) y `OPCIONES_POR_PREGUNTA` (4), que usan las validaciones y los tests.
 
 | Método | Ruta             | Parámetros                                                           |
 | :----- | :--------------- | :------------------------------------------------------------------- |
@@ -287,6 +306,7 @@ flowchart LR
 | :--------- | :---------------------------------------------------------- | :-------------------------------------------- |
 | Backend    | `express`                                                   | Servidor HTTP y API.                          |
 | Backend    | `cors`                                                      | Permite peticiones desde otro origen.         |
+| Backend    | `better-sqlite3`                                            | Motor SQLite local y persistencia de datos.   |
 | Backend    | `nodemon` (desarrollo)                                      | Reinicio automático con `npm run dev`.        |
 | Backend    | `supertest` (desarrollo)                                    | Peticiones HTTP a la API en los tests.        |
 | Frontend   | `react`, `react-dom`                                        | Interfaz de usuario.                          |
@@ -298,7 +318,7 @@ flowchart LR
 
 ### Decisiones técnicas
 
-- **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
+- **Persistencia en SQLite con migraciones versionadas:** se utiliza SQLite local embebido mediante `better-sqlite3` para almacenar las temáticas, preguntas e historial en `backend/datos/eduquest.db` sin requerir servicios externos ni servidores adicionales. El esquema se gestiona mediante una lista ordenada de migraciones versionadas y controladas por `PRAGMA user_version`. Si la base de datos está vacía al arrancar, se carga inicialmente desde `datos/preguntas.json`. Los tests utilizan una base en memoria (`:memory:`) para asegurar el aislamiento entre ejecuciones y evitar colisiones de estado.
 - **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/app.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
 - **Aplicación separada del arranque (`app.js` e `index.js`):** `crearAplicacion()` monta las rutas sin hacer `listen`, así los tests usan la aplicación con `supertest` sin ocupar un puerto. El historial se crea dentro de cada aplicación, de modo que cada test parte de un historial vacío; el servidor real crea una sola aplicación, así que su comportamiento no cambia.
 - **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.

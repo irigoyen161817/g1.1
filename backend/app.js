@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const datosPreguntas = require('./datos/preguntas.json');
+const { inicializarBaseDatos, RUTA_BASE_DATOS_POR_DEFECTO } = require('./baseDatos/conexion');
+const { crearRepositorioTematicas } = require('./baseDatos/repositorioTematicas');
+const { crearRepositorioPreguntas } = require('./baseDatos/repositorioPreguntas');
+const { crearRepositorioHistorial } = require('./baseDatos/repositorioHistorial');
 
 const PREGUNTAS_POR_CUESTIONARIO = 5;
 const OPCIONES_POR_PREGUNTA = 4;
@@ -35,32 +38,14 @@ function calcularEstadisticasHistorial(entradasHistorial) {
   );
 }
 
-function crearAplicacion() {
+function crearAplicacion({ rutaBaseDatos = process.env.RUTA_BASE_DATOS || ':memory:' } = {}) {
   const aplicacion = express();
+  const db = inicializarBaseDatos(rutaBaseDatos);
+  const repositorioTematicas = crearRepositorioTematicas(db);
+  const repositorioPreguntas = crearRepositorioPreguntas(db);
+  const repositorioHistorial = crearRepositorioHistorial(db);
 
-  // El historial vive dentro de cada aplicacion y no a nivel de modulo para que cada instancia
-  // (por ejemplo, la de cada test) empiece con un historial vacio y no comparta estado con otras
-  const historial = [];
-  let contadorIdHistorial = 1;
-
-  function registrarEntradaHistorial({ tematicaId, tematicaNombre, aciertos, total, nota }) {
-    const entrada = {
-      id: `hist-${contadorIdHistorial++}`,
-      fecha: new Date().toISOString(),
-      tematicaId,
-      tematicaNombre,
-      aciertos,
-      total,
-      nota
-    };
-
-    historial.push(entrada);
-    return entrada;
-  }
-
-  function obtenerHistorial() {
-    return [...historial];
-  }
+  aplicacion.db = db;
 
   aplicacion.use(cors());
   aplicacion.use(express.json());
@@ -78,24 +63,19 @@ function crearAplicacion() {
   });
 
   aplicacion.get('/api/tematicas', (peticion, respuesta) => {
-    const tematicas = datosPreguntas.categorias.map(({ id, nombre, descripcion, logo }) => ({
-      id,
-      nombre,
-      descripcion,
-      logo
-    }));
-
+    const tematicas = repositorioTematicas.obtenerTodas();
     respuesta.json(tematicas);
   });
 
   aplicacion.get('/api/preguntas', (peticion, respuesta) => {
     const { tematica, id } = peticion.query;
-    const categoria = datosPreguntas.categorias.find(({ id: categoriaId, nombre }) => {
-      if (id) {
-        return categoriaId === String(id);
-      }
-      return nombre.toLocaleLowerCase() === String(tematica).toLocaleLowerCase();
-    });
+    let categoria = null;
+
+    if (id) {
+      categoria = repositorioTematicas.obtenerPorId(String(id));
+    } else if (tematica) {
+      categoria = repositorioTematicas.obtenerPorNombre(String(tematica));
+    }
 
     if (!categoria) {
       respuesta.status(404).json({
@@ -104,16 +84,17 @@ function crearAplicacion() {
       return;
     }
 
-    const preguntas = [...categoria.preguntas]
+    const preguntas = repositorioPreguntas.obtenerPorTematica(categoria.id);
+    const preguntasPublicas = [...preguntas]
       .sort(() => Math.random() - 0.5)
       .slice(0, PREGUNTAS_POR_CUESTIONARIO)
       .map((pregunta) => {
-        const preguntaPublica = { ...pregunta };
-        delete preguntaPublica.respuestaCorrecta;
-        return preguntaPublica;
+        const copia = { ...pregunta };
+        delete copia.respuestaCorrecta;
+        return copia;
       });
 
-    respuesta.json(preguntas);
+    respuesta.json(preguntasPublicas);
   });
 
   aplicacion.post('/api/corregir', (peticion, respuesta) => {
@@ -130,7 +111,7 @@ function crearAplicacion() {
       return;
     }
 
-    const categoria = datosPreguntas.categorias.find(({ id }) => id === String(tematicaId));
+    const categoria = repositorioTematicas.obtenerPorId(String(tematicaId));
 
     if (!categoria) {
       respuesta.status(404).json({
@@ -139,9 +120,11 @@ function crearAplicacion() {
       return;
     }
 
+    const preguntasDeTematica = repositorioPreguntas.obtenerPorTematica(categoria.id);
+
     // GET /api/preguntas sirve un subconjunto de la tematica, asi que se esperan tantas respuestas
     // como preguntas tiene un cuestionario (o todas si la tematica tiene menos), no el total
-    const respuestasEsperadas = Math.min(PREGUNTAS_POR_CUESTIONARIO, categoria.preguntas.length);
+    const respuestasEsperadas = Math.min(PREGUNTAS_POR_CUESTIONARIO, preguntasDeTematica.length);
 
     if (respuestas.length !== respuestasEsperadas) {
       respuesta.status(400).json({
@@ -176,7 +159,7 @@ function crearAplicacion() {
     const detalle = [];
 
     for (const { idPregunta, indiceRespuesta } of respuestas) {
-      const pregunta = categoria.preguntas.find(({ id }) => id === idPregunta);
+      const pregunta = preguntasDeTematica.find(({ id }) => id === idPregunta);
 
       if (!pregunta) {
         respuesta.status(404).json({
@@ -197,7 +180,8 @@ function crearAplicacion() {
     const fallos = detalle.length - aciertos;
     const nota = Number(((aciertos / detalle.length) * 10).toFixed(1));
 
-    registrarEntradaHistorial({
+    repositorioHistorial.guardar({
+      id: repositorioHistorial.obtenerSiguienteId(),
       tematicaId: categoria.id,
       tematicaNombre: categoria.nombre,
       aciertos,
@@ -209,7 +193,7 @@ function crearAplicacion() {
   });
 
   aplicacion.get('/api/historial', (peticion, respuesta) => {
-    const listaHistorial = obtenerHistorial();
+    const listaHistorial = repositorioHistorial.obtenerTodas();
     const estadisticas = calcularEstadisticasHistorial(listaHistorial);
 
     respuesta.json({
@@ -224,5 +208,6 @@ function crearAplicacion() {
 module.exports = {
   crearAplicacion,
   PREGUNTAS_POR_CUESTIONARIO,
-  OPCIONES_POR_PREGUNTA
+  OPCIONES_POR_PREGUNTA,
+  RUTA_BASE_DATOS_POR_DEFECTO
 };
