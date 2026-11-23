@@ -4,7 +4,7 @@ Proyecto de desarrollo de la asignatura GPI1. EduQuest es una aplicación de cue
 
 ## Requisitos
 
-- Node.js 20 o superior.
+- Node.js 22 o superior.
 - npm.
 
 ## Inicio rápido
@@ -92,7 +92,7 @@ Los tests toman el número de preguntas por cuestionario y de opciones por pregu
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 22): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
