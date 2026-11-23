@@ -10,7 +10,6 @@ function PaginaCuestionario() {
 
   const [preguntas, setPreguntas] = useState([])
   const [estaCargando, setEstaCargando] = useState(true)
-  const [errorNoEncontrado, setErrorNoEncontrado] = useState(false)
   const [mensajeError, setMensajeError] = useState('')
 
   useEffect(() => {
@@ -18,7 +17,6 @@ function PaginaCuestionario() {
 
     const cargarPreguntas = async () => {
       setEstaCargando(true)
-      setErrorNoEncontrado(false)
       setMensajeError('')
 
       try {
@@ -27,7 +25,7 @@ function PaginaCuestionario() {
         })
 
         if (respuesta.status === 404) {
-          setErrorNoEncontrado(true)
+          setMensajeError('La temática solicitada no existe o no se encuentra disponible.')
           return
         }
 
@@ -50,9 +48,7 @@ function PaginaCuestionario() {
       }
     }
 
-    if (tematicaId) {
-      cargarPreguntas()
-    }
+    cargarPreguntas()
 
     return () => controlador.abort()
   }, [tematicaId])
@@ -69,22 +65,6 @@ function PaginaCuestionario() {
           <p className="estado-cuestionario" role="status">
             Cargando preguntas del cuestionario...
           </p>
-        </main>
-      </div>
-    )
-  }
-
-  if (errorNoEncontrado) {
-    return (
-      <div className="aplicacion">
-        <Encabezado />
-        <main className="pagina-cuestionario-estado">
-          <div className="alerta-error" role="alert">
-            <p>La temática solicitada no existe o no se encuentra disponible.</p>
-            <button className="boton-principal" type="button" onClick={volverAInicio}>
-              Volver a las temáticas
-            </button>
-          </div>
         </main>
       </div>
     )

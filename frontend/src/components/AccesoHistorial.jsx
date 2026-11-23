@@ -8,7 +8,7 @@ const BARRAS_DECORATIVAS = [
   { altura: 56, clase: 'barra-destacada' },
 ]
 
-function AccesoHistorial({ alVerHistorial, deshabilitado = false }) {
+function AccesoHistorial({ alVerHistorial }) {
   return (
     <section className="acceso-historial-contenedor" aria-labelledby="titulo-acceso-historial">
       <div className="acceso-historial">
@@ -39,12 +39,7 @@ function AccesoHistorial({ alVerHistorial, deshabilitado = false }) {
               <span key={indice} className={clase} style={{ height: altura }} />
             ))}
           </div>
-          <button
-            className="boton-ver-historial"
-            type="button"
-            onClick={alVerHistorial}
-            disabled={deshabilitado}
-          >
+          <button className="boton-ver-historial" type="button" onClick={alVerHistorial}>
             Ver historial
             <svg
               width="16"
