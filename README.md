@@ -68,7 +68,7 @@ Los tests de la API están en `backend/tests/` y usan el runner nativo de Node.j
 npm test
 ```
 
-Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado que puede devolver:
+Cada fichero `*.test.js` de la API cubre un endpoint y prueba todos los códigos de estado que puede devolver:
 
 | Fichero             | Endpoint              | Casos                 |
 | :------------------ | :-------------------- | :-------------------- |
@@ -76,6 +76,8 @@ Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado
 | `preguntas.test.js` | `GET /api/preguntas`  | `200` y `404`         |
 | `corregir.test.js`  | `POST /api/corregir`  | `200`, `400` y `404`  |
 | `historial.test.js` | `GET /api/historial`  | `200`                 |
+
+`racha.test.js` y `puntos.test.js` prueban las funciones puras de `backend/logica/` sin pasar por la API.
 
 Cada test crea su propia aplicación con `crearAplicacion()`, con el historial vacío, para no depender del estado de otro test. `tests/utilidades.js` reúne las funciones compartidas:
 
@@ -113,7 +115,8 @@ g1.1/
 ├── backend/
 │   ├── app.js                  aplicación Express y endpoints de la API
 │   ├── index.js                arranque del servidor
-│   ├── tests/                  tests de la API y utilidades compartidas
+│   ├── logica/                 funciones puras de racha, puntos y fechas
+│   ├── tests/                  tests de la API, de la lógica y utilidades compartidas
 │   └── datos/
 │       └── preguntas.json      temáticas y preguntas
 ├── frontend/
@@ -281,6 +284,18 @@ flowchart LR
 - **Navegación:** no hay librería de rutas; `App.jsx` cambia entre temáticas e historial con un estado, y el cuestionario y el resumen se muestran dentro de la pantalla de temáticas.
 - **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha` y `obtenerClaseNota` (color de la nota), para que una misma nota se vea igual en el resumen, el historial y los gráficos.
 
+#### Racha y puntos
+
+La lógica de gamificación está en `backend/logica/` como funciones puras, sin base de datos ni sesión, y todavía no la usa ningún endpoint:
+
+- `fechas.js`: `ZONA_HORARIA` (`Europe/Madrid`), `obtenerFechaLocal(fecha)` (día `AAAA-MM-DD` en hora de Madrid) y `diasEntre(fechaA, fechaB)`.
+- `racha.js`: `calcularNuevaRacha(rachaActual, fechaUltimaPartida, fechaHoy)` y `obtenerRachaVigente(rachaActual, fechaUltimaPartida, fechaHoy)`.
+- `puntos.js`: `PUNTOS_POR_ACIERTO` (10), `calcularMultiplicador(racha)` y `calcularPuntos(aciertos, racha)`.
+
+**Racha:** cuenta días naturales en hora de Madrid. La primera partida la deja en 1; jugar al día siguiente de la última partida suma 1, jugar el mismo día no la cambia y saltarse un día la reinicia a 1. La racha vigente es 0 si la última partida no fue hoy ni ayer.
+
+**Puntos:** `10 × aciertos × multiplicador`, redondeado al entero, con `multiplicador = min(1 + 0,1 × (racha − 1), 2)`. Con racha de 1 día es ×1 y llega a ×2 con 11 días o más; por ejemplo, 3 aciertos con racha de 4 días dan `30 × 1,3 = 39` puntos.
+
 ### Dependencias
 
 | Aplicación | Dependencia                                                 | Uso                                           |
@@ -301,6 +316,7 @@ flowchart LR
 - **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
 - **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/app.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
 - **Aplicación separada del arranque (`app.js` e `index.js`):** `crearAplicacion()` monta las rutas sin hacer `listen`, así los tests usan la aplicación con `supertest` sin ocupar un puerto. El historial se crea dentro de cada aplicación, de modo que cada test parte de un historial vacío; el servidor real crea una sola aplicación, así que su comportamiento no cambia.
+- **Días de racha en hora de Madrid, restados en UTC:** la racha se cuenta por días naturales de España y no del servidor. Para restar días, cada fecha local se convierte a medianoche UTC, donde todos los días duran 24 h, así el cambio de hora no altera la cuenta.
 - **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.
 - **Navegación con estado, sin router:** solo hay dos vistas, así que un estado en `App.jsx` es suficiente.
 - **Máximo de 10 partidas recientes:** el historial no está paginado y crece con cada cuestionario, así que el panel limita la lista (`MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
