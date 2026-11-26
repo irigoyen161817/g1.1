@@ -54,10 +54,35 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 | Raíz       | `npm run lint`         | Ejecuta ESLint en frontend y backend.                |
 | Raíz       | `npm run format`       | Aplica Prettier a frontend y backend.                |
 | Raíz       | `npm run format:check` | Comprueba el formato sin modificar archivos.         |
+| Raíz       | `npm test`             | Ejecuta los tests del backend.                       |
 | `frontend` | `npm run build`        | Genera la versión de producción en `frontend/dist/`. |
 | `frontend` | `npm run preview`      | Sirve localmente la versión generada con `build`.    |
 
-`backend` y `frontend` también tienen sus propios `lint`, `format` y `format:check`.
+`backend` y `frontend` también tienen sus propios `lint`, `format` y `format:check`, y `backend` tiene su propio `npm test`.
+
+## Tests
+
+Los tests de la API están en `backend/tests/` y usan el runner nativo de Node.js (`node:test`) con `supertest`, que hace las peticiones HTTP a la aplicación sin levantar el servidor en un puerto. Se ejecutan desde la raíz o desde `backend` con:
+
+```bash
+npm test
+```
+
+Cada fichero `*.test.js` cubre un endpoint y prueba todos los códigos de estado que puede devolver:
+
+| Fichero             | Endpoint              | Casos                 |
+| :------------------ | :-------------------- | :-------------------- |
+| `tematicas.test.js` | `GET /api/tematicas`  | `200`                 |
+| `preguntas.test.js` | `GET /api/preguntas`  | `200` y `404`         |
+| `corregir.test.js`  | `POST /api/corregir`  | `200`, `400` y `404`  |
+| `historial.test.js` | `GET /api/historial`  | `200`                 |
+
+Cada test crea su propia aplicación con `crearAplicacion()`, con el historial vacío, para no depender del estado de otro test. `tests/utilidades.js` reúne las funciones compartidas:
+
+- `respuestasDeTematica(tematicaId, { correctas })`: genera un cuerpo válido para `POST /api/corregir` con tantas respuestas acertadas como indique `correctas` y el resto falladas. Lanza un error si la temática no existe en `datos/preguntas.json`.
+- `enviarCorreccion(aplicacion, cuerpo)`: envía el cuerpo a `POST /api/corregir` de esa aplicación.
+
+Los tests toman el número de preguntas por cuestionario y de opciones por pregunta de las constantes que exporta `app.js` (`PREGUNTAS_POR_CUESTIONARIO` y `OPCIONES_POR_PREGUNTA`), así no se desincronizan si cambian.
 
 ## Calidad y formato del código
 
@@ -65,7 +90,7 @@ Si cambias `PUERTO`, actualiza también el `target` del proxy en `frontend/vite.
 - **Hooks de Husky** (se activan al ejecutar `npm install` en la raíz):
   - `pre-commit`: valida el nombre de la rama (`scripts/validarRama.js`), ejecuta ESLint en las dos aplicaciones y comprueba el formato.
   - `commit-msg`: valida el formato del mensaje de commit (`scripts/validarMensajeCommit.js`).
-- **GitLab CI** (`.gitlab-ci.yml`, imagen `node:20-alpine`): el stage `lint` ejecuta `lint` y `format:check` en frontend y backend, y el stage `build` compila el frontend. Una MR no puede fusionarse hasta que el pipeline termine en verde.
+- **GitHub Actions** (`.github/workflows/ci.yml`, Node.js 20): se ejecuta en cada pull request y en cada push a `main`. Lanza en paralelo cuatro jobs: `lint (frontend)` y `lint (backend)` ejecutan `lint` y `format:check` en cada aplicación, `build (frontend)` compila el frontend y `test (backend)` ejecuta los tests de la API. La protección de `main` exige los cuatro checks, así que una pull request con un test roto no puede fusionarse.
 
 Las convenciones de ramas y commits que validan los hooks están en `CONTRIBUTING.md`.
 
@@ -86,7 +111,9 @@ flowchart LR
 ```text
 g1.1/
 ├── backend/
-│   ├── index.js                servidor Express y endpoints de la API
+│   ├── app.js                  aplicación Express y endpoints de la API
+│   ├── index.js                arranque del servidor
+│   ├── tests/                  tests de la API y utilidades compartidas
 │   └── datos/
 │       └── preguntas.json      temáticas y preguntas
 ├── frontend/
@@ -101,16 +128,15 @@ g1.1/
 │       ├── index.css           reset, variables globales y botones compartidos
 │       └── vistaDiseno.css     variables del diseño "Cognitive Clarity"
 ├── scripts/                    arranque único y validadores de los hooks
-├── .gitlab/                    plantillas de merge request
+├── .github/                    workflow de CI y plantilla de pull request
 ├── .husky/                     hooks de Git
-├── .gitlab-ci.yml              pipeline de CI
 ├── CONTRIBUTING.md             convenciones del proyecto
 └── sprint-backlog-eduquest.xlsx  product backlog, seguimiento de sprints y retrospectiva
 ```
 
 ### Backend
 
-El punto de entrada es `backend/index.js`. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
+El punto de entrada es `backend/index.js`, que solo arranca el servidor en `PUERTO`. La aplicación se define en `backend/app.js`, que exporta `crearAplicacion()`: crea la aplicación Express con sus rutas y su propio historial, sin hacer `listen`. También exporta `PREGUNTAS_POR_CUESTIONARIO` (5) y `OPCIONES_POR_PREGUNTA` (4), que usan las validaciones y los tests. Las temáticas y sus preguntas se leen de `backend/datos/preguntas.json`; cada pregunta tiene un `id`, un `enunciado`, cuatro `opciones` y el índice de la `respuestaCorrecta`.
 
 | Método | Ruta             | Parámetros                                                           |
 | :----- | :--------------- | :------------------------------------------------------------------- |
@@ -252,6 +278,7 @@ flowchart LR
   C -->|responde la última pregunta| R["Resumen (en cuestionario)"]
   R -->|volver| T
   T <-->|ver historial / volver| H["/historial"]
+  H -->|repetir suspendido| C
 ```
 
 | Pantalla     | Componente principal  | Qué muestra                                                   | Componentes hijos                                                                      |
@@ -259,10 +286,10 @@ flowchart LR
 | Temáticas    | `SeleccionTematica`   | Una tarjeta por temática y el botón para ver el historial     | `Encabezado`, `TarjetaTematica`, `AccesoHistorial`                                     |
 | Cuestionario | `PaginaCuestionario`  | Carga y muestra el cuestionario o 404                         | `Encabezado`, `PantallaPregunta` (con `ProgresoCuestionario`, `TarjetaPregunta`, `ControlesPregunta`, `ResumenCuestionario`) |
 | Resumen      | `ResumenCuestionario` | La nota, los aciertos y fallos, y el detalle de cada pregunta | `DetallePregunta`                                                                      |
-| Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos y las últimas partidas      | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
+| Historial    | `PanelHistorial`      | Resumen de partidas, dos gráficos, las últimas partidas y opción de repetir suspendidos | `Encabezado`, `EvolucionHistorial` (líneas), `EstadisticasCategorias` (barras)         |
 
 - **Navegación:** gestionada mediante `react-router-dom` v7 con `BrowserRouter`, `Routes` y `Route` en `App.jsx`, permitiendo recargar o compartir la URL y usar el botón "atrás" del navegador. `SeleccionTematica` y `PanelHistorial` navegan utilizando `useNavigate`. El resumen sigue siendo un estado dentro del cuestionario.
-- **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha` y `obtenerClaseNota` (color de la nota), para que una misma nota se vea igual en el resumen, el historial y los gráficos.
+- **Utilidades compartidas (`src/utils.js`):** `formatearNota`, `formatearFecha`, `obtenerClaseNota` (color de la nota) y `esNotaAprobada` (con umbral fijado en `NOTA_MINIMA_APROBADO = 5`), para que los criterios de aprobado y formato de nota sean consistentes en toda la aplicación.
 
 ### Dependencias
 
@@ -271,6 +298,7 @@ flowchart LR
 | Backend    | `express`                                                   | Servidor HTTP y API.                          |
 | Backend    | `cors`                                                      | Permite peticiones desde otro origen.         |
 | Backend    | `nodemon` (desarrollo)                                      | Reinicio automático con `npm run dev`.        |
+| Backend    | `supertest` (desarrollo)                                    | Peticiones HTTP a la API en los tests.        |
 | Frontend   | `react`, `react-dom`                                        | Interfaz de usuario.                          |
 | Frontend   | `react-router-dom`                                          | Sistema de enrutamiento y navegación cliente. |
 | Frontend   | `vite` (desarrollo)                                         | Servidor de desarrollo, proxy `/api` y build. |
@@ -282,7 +310,8 @@ flowchart LR
 ### Decisiones técnicas
 
 - **Historial en memoria:** no hay base de datos todavía; el historial se guarda en un array del backend para poder construir el panel sin añadir infraestructura. Por eso es volátil y compartido entre usuarios.
-- **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/index.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
+- **5 preguntas aleatorias por cuestionario:** la constante `PREGUNTAS_POR_CUESTIONARIO` de `backend/app.js` fija cuántas preguntas sirve `GET /api/preguntas` y cuántas respuestas exige `POST /api/corregir`. Así cada partida es distinta aunque se repita la temática, y una temática puede tener más preguntas en `preguntas.json` sin dejar de poder corregirse. El backend nunca envía la respuesta correcta al cliente, solo en la corrección.
+- **Aplicación separada del arranque (`app.js` e `index.js`):** `crearAplicacion()` monta las rutas sin hacer `listen`, así los tests usan la aplicación con `supertest` sin ocupar un puerto. El historial se crea dentro de cada aplicación, de modo que cada test parte de un historial vacío; el servidor real crea una sola aplicación, así que su comportamiento no cambia.
 - **Proxy de Vite en lugar de URLs absolutas:** el frontend llama a `/api/...` y Vite lo reenvía al backend, así no hay que configurar la URL del backend en el cliente.
 - **Enrutamiento declarativo con `react-router-dom`:** cada pantalla dispone de su propia URL (`/`, `/cuestionario/:tematicaId`, `/historial`), lo que permite recargar la página directamente y utilizar el historial del navegador ("atrás" / "adelante").
 - **Máximo de 10 partidas recientes:** el historial no está paginado y crece con cada cuestionario, así que el panel limita la lista (`MAXIMO_PARTIDAS_RECIENTES` en `PanelHistorial.jsx`).
@@ -291,7 +320,9 @@ flowchart LR
 - **Fuentes locales con `@fontsource`:** evitan peticiones a servicios externos.
 - **Etiquetas de los gráficos en varias líneas:** el texto SVG no hace saltos de línea, así que los nombres largos de las temáticas se dividen para que no se solapen en móvil.
 - **Arranque único sin dependencias (`scripts/iniciar.js`):** funciona en un clon recién hecho antes de instalar nada. Al terminar detiene ambos servidores (en Windows con `taskkill /T` y en macOS/Linux con grupos de procesos) para no dejar puertos ocupados.
+- **Repetición de exámenes suspendidos desde el historial:** se define `NOTA_MINIMA_APROBADO = 5` en `src/utils.js` para delimitar las notas aprobadas. En la lista de partidas recientes de `PanelHistorial`, cada partida suspendida muestra un botón "Repetir" con `<Link>` accesible mediante `aria-label` que navega directamente a `/cuestionario/:tematicaId`, facilitando al estudiante volver a realizar el cuestionario de esa temática sin pasar por el selector inicial.
+- **Migración de GitLab a GitHub:** el repositorio, las issues, las etiquetas y los milestones se trasladaron a GitHub conservando la numeración de las issues, para que las referencias `#N` de los commits sigan siendo válidas. El pipeline de GitLab CI se sustituyó por un workflow de GitHub Actions con los mismos pasos, y la rama `main` está protegida: exige pull request con una aprobación y el CI en verde.
 
 ## Flujo de contribución
 
-Las ramas, commits y merge requests deben seguir las reglas definidas en `CONTRIBUTING.md`. Todo cambio debe revisarse mediante una merge request antes de incorporarse a `main`.
+El repositorio está alojado en GitHub: https://github.com/irigoyen161817/g1.1. Las ramas, commits y pull requests deben seguir las reglas definidas en `CONTRIBUTING.md`. Todo cambio debe revisarse mediante una pull request antes de incorporarse a `main`.

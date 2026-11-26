@@ -1,3 +1,9 @@
+export const NOTA_MINIMA_APROBADO = 5
+
+export function esNotaAprobada(nota) {
+  return nota >= NOTA_MINIMA_APROBADO
+}
+
 export function formatearFecha(fechaIso) {
   return new Date(fechaIso).toLocaleDateString('es-ES', {
     day: '2-digit',
@@ -15,5 +21,5 @@ export function obtenerClaseNota(nota) {
     return 'nota-alta'
   }
 
-  return nota >= 5 ? 'nota-media' : 'nota-baja'
+  return esNotaAprobada(nota) ? 'nota-media' : 'nota-baja'
 }

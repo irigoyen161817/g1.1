@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Encabezado from './Encabezado'
 import EstadisticasCategorias from './EstadisticasCategorias'
 import EvolucionHistorial from './EvolucionHistorial'
-import { formatearFecha, formatearNota, obtenerClaseNota } from '../utils'
+import { esNotaAprobada, formatearFecha, formatearNota, obtenerClaseNota } from '../utils'
 import './PanelHistorial.css'
 
 // El historial en memoria del backend crece con cada cuestionario y no se pagina, así que
@@ -174,22 +174,36 @@ function PanelHistorial() {
               <section className="partidas-recientes" aria-labelledby="titulo-partidas">
                 <h2 id="titulo-partidas">Partidas recientes</h2>
                 <ul>
-                  {partidasRecientes.map((partida) => (
-                    <li key={partida.id} className="partida">
-                      <div className="partida-info">
-                        <span className="partida-tematica">{partida.tematicaNombre}</span>
-                        <span className="partida-fecha">{formatearFecha(partida.fecha)}</span>
-                      </div>
-                      <div className="partida-resultado">
-                        <span className="partida-aciertos">
-                          {partida.aciertos} de {partida.total} aciertos
-                        </span>
-                        <span className={`partida-nota ${obtenerClaseNota(partida.nota)}`}>
-                          {formatearNota(partida.nota)}/10
-                        </span>
-                      </div>
-                    </li>
-                  ))}
+                  {partidasRecientes.map((partida) => {
+                    // Los cuestionarios con nota inferior a 5 se consideran suspensos y permiten reintentar directamente la temática
+                    const estaSuspendida = !esNotaAprobada(partida.nota)
+
+                    return (
+                      <li key={partida.id} className="partida">
+                        <div className="partida-info">
+                          <span className="partida-tematica">{partida.tematicaNombre}</span>
+                          <span className="partida-fecha">{formatearFecha(partida.fecha)}</span>
+                        </div>
+                        <div className="partida-resultado">
+                          <span className="partida-aciertos">
+                            {partida.aciertos} de {partida.total} aciertos
+                          </span>
+                          <span className={`partida-nota ${obtenerClaseNota(partida.nota)}`}>
+                            {formatearNota(partida.nota)}/10
+                          </span>
+                          {estaSuspendida && (
+                            <Link
+                              to={`/cuestionario/${encodeURIComponent(partida.tematicaId)}`}
+                              className="boton-repetir-examen"
+                              aria-label={`Repetir el examen de ${partida.tematicaNombre}`}
+                            >
+                              Repetir
+                            </Link>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
                 </ul>
               </section>
             </div>
